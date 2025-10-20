@@ -2222,3 +2222,132 @@ footer {
   margin: 1.5rem 0 1rem 0;
   font-weight: 600;
 }
+
+/* Mermaid Diagrams */
+.mermaid-flow-section {
+  margin: 2rem 0;
+  padding: 2rem 0;
+  border-top: 2px solid var(--border-color);
+}
+
+.mermaid-container {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.mermaid {
+  display: flex;
+  justify-content: center;
+  min-height: 400px;
+}
+
+/* DynamoDB Structure */
+.dynamodb-structure {
+  margin: 2rem 0;
+  padding: 2rem 0;
+  border-top: 2px solid var(--border-color);
+}
+
+.db-schema {
+  margin: 1.5rem 0;
+}
+
+.db-schema h5 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sample-records {
+  margin: 2rem 0;
+}
+
+.sample-records h5 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sample-records pre {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Version Management */
+.version-management {
+  margin: 2rem 0;
+  padding: 2rem 0;
+  border-top: 2px solid var(--border-color);
+}
+
+.management-sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.management-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.management-card h5 {
+  color: var(--primary-color);
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.management-card pre {
+  background: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Responsive Design for Complex Sections */
+@media (max-width: 768px) {
+  .mermaid-container {
+    padding: 1rem;
+  }
+  
+  .management-card {
+    padding: 1.5rem;
+  }
+  
+  .management-card pre {
+    font-size: 0.8rem;
+    padding: 1rem;
+  }
+  
+  .sample-records pre {
+    font-size: 0.8rem;
+    padding: 1rem;
+  }
+}

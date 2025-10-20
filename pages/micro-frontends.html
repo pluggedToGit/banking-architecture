@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -817,6 +818,849 @@ class MFEUpdateService {
                                 </div>
                             </div>
                             
+                            <div class="mermaid-flow-section">
+                                <h4>🔄 Detailed Mermaid Flow Diagram</h4>
+                                <p>Interactive flowchart showing the complete MFE discovery, loading, and state management process:</p>
+                                
+                                <div class="mermaid-container">
+                                    <div class="mermaid">
+flowchart TD
+    A[User Opens Banking App] --> B[Shell App Initialization]
+    B --> C[Check localStorage for JWT]
+    C --> D{Valid JWT Token?}
+    D -->|No| E[Redirect to ADFS Login]
+    D -->|Yes| F[Validate Token with Auth API]
+    
+    E --> G[SAML Authentication]
+    G --> H[Receive JWT + Permissions]
+    H --> F
+    F --> I[Extract User Context]
+    
+    I --> J[Query DynamoDB MFE Registry]
+    J --> K[Filter MFEs by User Role]
+    K --> L[Get Environment-specific URLs]
+    
+    L --> M[Parallel Health Checks]
+    M --> N{All MFEs Healthy?}
+    N -->|No| O[Check Cache for Failed MFEs]
+    N -->|Yes| P[Load MFE Configurations]
+    
+    O --> Q{Cached Version Available?}
+    Q -->|Yes| R[Load from Cache with Warning]
+    Q -->|No| S[Load Fallback UI]
+    
+    P --> T[Dynamic Import via Module Federation]
+    T --> U[Version Compatibility Check]
+    U --> V{Compatible?}
+    V -->|No| W[Load Compatible Fallback Version]
+    V -->|Yes| X[Initialize MFE Container]
+    
+    R --> X
+    S --> X
+    W --> X
+    
+    X --> Y[Setup Redux Store Connection]
+    Y --> Z[Initialize Event Bus]
+    Z --> AA[Mount MFE in DOM]
+    AA --> BB[Subscribe to State Updates]
+    BB --> CC[Setup WebSocket Connection]
+    CC --> DD[MFE Ready for Interaction]
+    
+    DD --> EE[User Navigation Event]
+    EE --> FF{Target MFE Loaded?}
+    FF -->|Yes| GG[Route to Existing MFE]
+    FF -->|No| HH[Trigger Lazy Load]
+    HH --> J
+    GG --> DD
+    
+    %% State Management Flow
+    DD --> II[User Action in MFE]
+    II --> JJ[Dispatch Redux Action]
+    JJ --> KK[Action Type Check]
+    KK --> LL{Cross-MFE Action?}
+    LL -->|Yes| MM[Publish to Event Bus]
+    LL -->|No| NN[Update Local State]
+    MM --> OO[Other MFEs Subscribe]
+    OO --> PP[Update Shared State]
+    PP --> QQ[Re-render Components]
+    NN --> QQ
+    
+    %% Real-time Updates
+    CC --> RR[WebSocket Message Received]
+    RR --> SS[Parse Banking Event]
+    SS --> TT{Account Balance Update?}
+    TT -->|Yes| UU[Update Account MFE State]
+    TT -->|No| VV{Transaction Alert?}
+    VV -->|Yes| WW[Show Notification]
+    VV -->|No| XX[Route to Handler]
+    UU --> QQ
+    WW --> QQ
+    XX --> QQ
+
+    classDef userAction fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef systemProcess fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef errorState fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef successState fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    
+    class A,EE,II userAction
+    class B,F,I,J,P,T,Y,Z,AA,CC systemProcess
+    class D,N,Q,V,FF,LL,TT,VV decision
+    class E,O,S,W errorState
+    class DD,QQ successState
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="dynamodb-structure">
+                                <h4>🗄️ DynamoDB MFE Registry Structure</h4>
+                                <p>Complete data model for managing MFE configurations, versions, and deployments:</p>
+                                
+                                <div class="db-schema">
+                                    <h5>📋 Table Schema Design</h5>
+                                    <pre><code class="language-json">// DynamoDB Table: banking-mfe-registry
+{
+  "TableName": "banking-mfe-registry",
+  "KeySchema": [
+    {
+      "AttributeName": "mfe_id",
+      "KeyType": "HASH"    // Partition Key
+    },
+    {
+      "AttributeName": "version_environment", 
+      "KeyType": "RANGE"   // Sort Key: "2.1.0#production"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "environment-status-index",
+      "KeySchema": [
+        {
+          "AttributeName": "environment",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "status",
+          "KeyType": "RANGE"
+        }
+      ]
+    },
+    {
+      "IndexName": "active-version-index", 
+      "KeySchema": [
+        {
+          "AttributeName": "mfe_id",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "is_active",
+          "KeyType": "RANGE"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+                                </div>
+                                
+                                <div class="sample-records">
+                                    <h5>📝 Sample MFE Registry Records</h5>
+                                    <pre><code class="language-json">// Active Production Account MFE
+{
+  "mfe_id": "account_mfe",
+  "version_environment": "2.1.0#production",
+  "version": "2.1.0",
+  "environment": "production",
+  "is_active": "true",
+  "status": "active",
+  "deployment_config": {
+    "remote_entry_url": "https://account.banking.com/remoteEntry.js",
+    "health_check_url": "https://account.banking.com/health",
+    "cdn_urls": {
+      "primary": "https://cdn.banking.com/account-mfe/2.1.0/",
+      "fallback": "https://backup-cdn.banking.com/account-mfe/2.1.0/"
+    }
+  },
+  "permissions": {
+    "required_roles": ["customer", "premium_customer", "business_customer"],
+    "required_permissions": ["account:read", "account:write", "transaction:read"],
+    "restricted_roles": ["guest", "suspended"]
+  },
+  "compatibility": {
+    "shell_version_min": "1.5.0",
+    "shell_version_max": "2.0.0",
+    "react_version": "^18.0.0",
+    "shared_dependencies": {
+      "@banking/design-system": "^3.2.0",
+      "@banking/utils": "^1.8.0"
+    }
+  },
+  "feature_flags": {
+    "enable_investment_view": true,
+    "enable_credit_score": false,
+    "beta_features": ["quick_transfer", "budget_insights"]
+  },
+  "performance_config": {
+    "lazy_load": false,
+    "preload_priority": "high",
+    "bundle_size_limit": "500kb",
+    "load_timeout": 10000
+  },
+  "rollback_config": {
+    "previous_version": "2.0.8",
+    "rollback_trigger": "error_rate_threshold",
+    "error_threshold": 0.05
+  },
+  "metadata": {
+    "team": "account-team",
+    "deployed_by": "ci-cd-pipeline",
+    "deployed_at": "2024-10-20T10:30:00Z",
+    "git_commit": "abc123def456",
+    "build_number": "1247"
+  },
+  "ttl": 1735689600  // TTL for cleanup of old versions
+}
+
+// Staging Version for Testing
+{
+  "mfe_id": "account_mfe",
+  "version_environment": "2.2.0-beta.1#staging",
+  "version": "2.2.0-beta.1",
+  "environment": "staging",
+  "is_active": "true",
+  "status": "active",
+  "deployment_config": {
+    "remote_entry_url": "https://staging-account.banking.com/remoteEntry.js",
+    "health_check_url": "https://staging-account.banking.com/health"
+  },
+  "feature_flags": {
+    "enable_investment_view": true,
+    "enable_credit_score": true,  // Testing new feature
+    "beta_features": ["quick_transfer", "budget_insights", "ai_recommendations"]
+  },
+  // ... other fields similar to production
+}
+
+// Payment MFE with A/B Testing
+{
+  "mfe_id": "payment_mfe",
+  "version_environment": "1.8.0#production",
+  "version": "1.8.0",
+  "environment": "production", 
+  "is_active": "true",
+  "status": "active",
+  "deployment_config": {
+    "remote_entry_url": "https://payment.banking.com/remoteEntry.js",
+    "health_check_url": "https://payment.banking.com/health"
+  },
+  "ab_testing": {
+    "enabled": true,
+    "variants": [
+      {
+        "variant_id": "new_ui",
+        "traffic_percentage": 10,
+        "remote_entry_url": "https://payment.banking.com/v2/remoteEntry.js"
+      },
+      {
+        "variant_id": "original",
+        "traffic_percentage": 90, 
+        "remote_entry_url": "https://payment.banking.com/remoteEntry.js"
+      }
+    ]
+  },
+  "permissions": {
+    "required_roles": ["customer", "premium_customer", "business_customer"],
+    "required_permissions": ["payment:read", "payment:write", "transfer:execute"],
+    "restricted_roles": ["guest", "limited_access"]
+  }
+}
+
+// Canary Deployment Record
+{
+  "mfe_id": "investment_mfe",
+  "version_environment": "3.0.0#production-canary",
+  "version": "3.0.0",
+  "environment": "production",
+  "is_active": "true", 
+  "status": "canary",
+  "canary_config": {
+    "traffic_percentage": 5,
+    "target_users": ["premium_customer", "wealth_management"],
+    "success_metrics": {
+      "error_rate_threshold": 0.01,
+      "response_time_p95": 500,
+      "user_satisfaction": 4.5
+    },
+    "rollback_conditions": {
+      "error_rate_breach": true,
+      "performance_degradation": true,
+      "user_feedback_negative": true
+    }
+  }
+}</code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="version-management">
+                                <h4>🔄 Version Management Strategy</h4>
+                                
+                                <div class="management-sections">
+                                    <div class="management-card">
+                                        <h5>Active Version Resolution</h5>
+                                        <pre><code class="language-typescript">// Version Resolution Service
+class MFEVersionManager {
+  async getActiveMFE(mfeId: string, userContext: UserContext): Promise<MFEConfig> {
+    const environment = process.env.NODE_ENV || 'production';
+    
+    // 1. Check for user-specific overrides (A/B testing, canary)
+    const userOverride = await this.checkUserOverrides(mfeId, userContext);
+    if (userOverride) {
+      return userOverride;
+    }
+    
+    // 2. Get active version for environment
+    const activeVersion = await this.dynamoClient.query({
+      TableName: 'banking-mfe-registry',
+      IndexName: 'active-version-index',
+      KeyConditionExpression: 'mfe_id = :mfe_id AND is_active = :active',
+      FilterExpression: 'environment = :env AND #status = :status',
+      ExpressionAttributeNames: {
+        '#status': 'status'
+      },
+      ExpressionAttributeValues: {
+        ':mfe_id': mfeId,
+        ':active': 'true',
+        ':env': environment,
+        ':status': 'active'
+      }
+    }).promise();
+    
+    if (!activeVersion.Items?.length) {
+      throw new Error(`No active version found for ${mfeId} in ${environment}`);
+    }
+    
+    // 3. Return highest version if multiple active (shouldn't happen in production)
+    return this.selectBestVersion(activeVersion.Items, userContext);
+  }
+  
+  private async checkUserOverrides(
+    mfeId: string, 
+    userContext: UserContext
+  ): Promise<MFEConfig | null> {
+    
+    // Check for A/B testing participation
+    const abConfig = await this.getABTestConfig(mfeId, userContext);
+    if (abConfig) {
+      return abConfig;
+    }
+    
+    // Check for canary deployment eligibility
+    const canaryConfig = await this.getCanaryConfig(mfeId, userContext);
+    if (canaryConfig) {
+      return canaryConfig;
+    }
+    
+    // Check for user-specific beta features
+    const betaConfig = await this.getBetaConfig(mfeId, userContext);
+    if (betaConfig) {
+      return betaConfig;
+    }
+    
+    return null;
+  }
+}</code></pre>
+                                    </div>
+                                    
+                                    <div class="management-card">
+                                        <h5>Deployment Pipeline Integration</h5>
+                                        <pre><code class="language-typescript">// Deployment Management
+class MFEDeploymentManager {
+  
+  // Blue-Green Deployment
+  async deployBlueGreen(mfeId: string, newVersion: string): Promise<void> {
+    // 1. Deploy to staging environment first
+    await this.deployToEnvironment(mfeId, newVersion, 'staging');
+    
+    // 2. Run automated tests
+    const testResults = await this.runAutomatedTests(mfeId, newVersion, 'staging');
+    if (!testResults.passed) {
+      throw new Error(`Tests failed for ${mfeId}@${newVersion}`);
+    }
+    
+    // 3. Deploy to production as inactive
+    await this.deployToEnvironment(mfeId, newVersion, 'production', false);
+    
+    // 4. Run production smoke tests
+    const smokeTests = await this.runSmokeTests(mfeId, newVersion, 'production');
+    if (!smokeTests.passed) {
+      await this.rollback(mfeId, 'production');
+      throw new Error(`Smoke tests failed for ${mfeId}@${newVersion}`);
+    }
+    
+    // 5. Switch traffic (atomic operation)
+    await this.switchTraffic(mfeId, newVersion, 'production');
+    
+    // 6. Monitor for 15 minutes
+    await this.monitorDeployment(mfeId, newVersion, 900000); // 15 minutes
+  }
+  
+  // Canary Deployment
+  async deployCanary(
+    mfeId: string, 
+    newVersion: string, 
+    canaryPercentage: number = 5
+  ): Promise<void> {
+    
+    const canaryRecord = {
+      mfe_id: mfeId,
+      version_environment: `${newVersion}#production-canary`,
+      version: newVersion,
+      environment: 'production',
+      is_active: 'true',
+      status: 'canary',
+      canary_config: {
+        traffic_percentage: canaryPercentage,
+        start_time: new Date().toISOString(),
+        success_metrics: {
+          error_rate_threshold: 0.01,
+          response_time_p95: 500,
+          conversion_rate_drop_threshold: 0.05
+        }
+      }
+    };
+    
+    // Deploy canary version
+    await this.dynamoClient.putItem({
+      TableName: 'banking-mfe-registry',
+      Item: canaryRecord
+    }).promise();
+    
+    // Monitor canary metrics
+    this.startCanaryMonitoring(mfeId, newVersion);
+  }
+  
+  private async switchTraffic(
+    mfeId: string, 
+    newVersion: string, 
+    environment: string
+  ): Promise<void> {
+    
+    // Atomic switch using DynamoDB transactions
+    const transactionItems = [
+      // Deactivate old version
+      {
+        Update: {
+          TableName: 'banking-mfe-registry',
+          Key: { 
+            mfe_id: mfeId,
+            version_environment: await this.getCurrentActiveVersion(mfeId, environment)
+          },
+          UpdateExpression: 'SET is_active = :inactive, deactivated_at = :now',
+          ExpressionAttributeValues: {
+            ':inactive': 'false',
+            ':now': new Date().toISOString()
+          }
+        }
+      },
+      // Activate new version  
+      {
+        Update: {
+          TableName: 'banking-mfe-registry',
+          Key: {
+            mfe_id: mfeId,
+            version_environment: `${newVersion}#${environment}`
+          },
+          UpdateExpression: 'SET is_active = :active, activated_at = :now',
+          ExpressionAttributeValues: {
+            ':active': 'true',
+            ':now': new Date().toISOString()
+          }
+        }
+      }
+    ];
+    
+    await this.dynamoClient.transactWrite({
+      TransactItems: transactionItems
+    }).promise();
+    
+    // Invalidate CDN cache
+    await this.invalidateCDNCache(mfeId);
+    
+    // Notify monitoring systems
+    await this.notifyDeployment(mfeId, newVersion, environment);
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="state-management-integration">
+                                <h4>🔄 State Management & Real-time Synchronization</h4>
+                                <p>Detailed implementation of cross-MFE state management with real-time updates:</p>
+                                
+                                <div class="state-flow-diagram">
+                                    <h5>Redux Store Integration Flow</h5>
+                                    <div class="mermaid-container">
+                                        <div class="mermaid">
+graph TD
+    A[User Action in Account MFE] --> B[Dispatch Redux Action]
+    B --> C{Action Type Analysis}
+    C -->|LOCAL_ONLY| D[Update Account MFE State]
+    C -->|CROSS_MFE| E[Publish to Event Bus]
+    C -->|GLOBAL_STATE| F[Update Shared Redux Store]
+    
+    E --> G[Payment MFE Subscribes]
+    E --> H[Navigation MFE Subscribes]
+    E --> I[Shell App Subscribes]
+    
+    G --> J[Update Payment State]
+    H --> K[Update Navigation Badge]
+    I --> L[Update Global Context]
+    
+    F --> M[All MFEs Get State Update]
+    M --> N[Re-render Components]
+    
+    D --> N
+    J --> N
+    K --> N
+    L --> N
+    
+    %% WebSocket Integration
+    O[WebSocket Server Message] --> P[Parse Banking Event]
+    P --> Q{Event Type}
+    Q -->|BALANCE_UPDATE| R[Update Account Store]
+    Q -->|TRANSACTION_ALERT| S[Show Notification]
+    Q -->|FRAUD_ALERT| T[Security Action Required]
+    
+    R --> F
+    S --> U[Notification MFE]
+    T --> V[Security MFE Load]
+    
+    classDef userAction fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef systemProcess fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef realtime fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A userAction
+    class B,E,F,M,P systemProcess
+    class C,Q decision
+    class O,R,S,T realtime
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="advanced-patterns">
+                                    <h5>Advanced State Synchronization Patterns</h5>
+                                    <pre><code class="language-typescript">// Advanced State Management for Banking MFEs
+interface BankingStateManager {
+  // Cross-MFE State Synchronization
+  syncState<T>(
+    sourceState: T, 
+    targetMFEs: string[], 
+    syncStrategy: 'immediate' | 'batched' | 'optimistic'
+  ): Promise<void>;
+  
+  // Conflict Resolution for Concurrent Updates
+  resolveConflict<T>(
+    currentState: T, 
+    incomingState: T, 
+    conflictStrategy: ConflictResolutionStrategy
+  ): T;
+  
+  // Real-time Event Processing
+  processRealtimeEvent(
+    event: BankingEvent, 
+    affectedMFEs?: string[]
+  ): Promise<void>;
+}
+
+class BankingStateManager implements BankingStateManager {
+  private eventBus: EventBus;
+  private store: EnhancedStore;
+  private websocket: WebSocketManager;
+  private conflictResolver: ConflictResolver;
+  
+  constructor() {
+    this.setupEventBus();
+    this.initializeWebSocketHandlers();
+    this.configureConflictResolution();
+  }
+  
+  // Optimistic Updates with Rollback
+  async optimisticUpdate<T>(
+    mfeId: string,
+    stateKey: string,
+    optimisticValue: T,
+    serverOperation: () => Promise<T>
+  ): Promise<T> {
+    
+    // 1. Apply optimistic update immediately
+    const previousState = this.store.getState()[stateKey];
+    this.store.dispatch({
+      type: 'OPTIMISTIC_UPDATE',
+      payload: { stateKey, value: optimisticValue, mfeId }
+    });
+    
+    // 2. Update UI immediately
+    this.notifyMFEs([mfeId], stateKey, optimisticValue);
+    
+    try {
+      // 3. Execute server operation
+      const serverResult = await serverOperation();
+      
+      // 4. Confirm optimistic update
+      this.store.dispatch({
+        type: 'CONFIRM_OPTIMISTIC_UPDATE',
+        payload: { stateKey, value: serverResult, mfeId }
+      });
+      
+      return serverResult;
+      
+    } catch (error) {
+      // 5. Rollback on failure
+      this.store.dispatch({
+        type: 'ROLLBACK_OPTIMISTIC_UPDATE', 
+        payload: { stateKey, previousValue: previousState, mfeId }
+      });
+      
+      // 6. Notify user of failure
+      this.eventBus.publish('OPERATION_FAILED', {
+        mfeId,
+        operation: 'optimistic_update',
+        error: error.message
+      });
+      
+      throw error;
+    }
+  }
+  
+  // Cross-MFE State Synchronization
+  async syncState<T>(
+    sourceState: T,
+    targetMFEs: string[],
+    syncStrategy: 'immediate' | 'batched' | 'optimistic' = 'immediate'
+  ): Promise<void> {
+    
+    switch (syncStrategy) {
+      case 'immediate':
+        await Promise.all(
+          targetMFEs.map(mfeId => 
+            this.sendStateUpdate(mfeId, sourceState)
+          )
+        );
+        break;
+        
+      case 'batched':
+        this.batchStateUpdates(targetMFEs, sourceState);
+        break;
+        
+      case 'optimistic':
+        // Apply immediately, sync in background
+        this.notifyMFEs(targetMFEs, 'state_update', sourceState);
+        this.backgroundSync(targetMFEs, sourceState);
+        break;
+    }
+  }
+  
+  // Real-time WebSocket Event Processing
+  async processRealtimeEvent(
+    event: BankingEvent,
+    affectedMFEs?: string[]
+  ): Promise<void> {
+    
+    const timestamp = Date.now();
+    
+    // Validate event integrity
+    if (!this.validateEvent(event)) {
+      console.error('Invalid banking event received:', event);
+      return;
+    }
+    
+    // Determine affected MFEs if not specified
+    if (!affectedMFEs) {
+      affectedMFEs = this.determineAffectedMFEs(event);
+    }
+    
+    // Process based on event type
+    switch (event.type) {
+      case 'ACCOUNT_BALANCE_UPDATE':
+        await this.handleBalanceUpdate(event, affectedMFEs);
+        break;
+        
+      case 'TRANSACTION_COMPLETED':
+        await this.handleTransactionComplete(event, affectedMFEs);
+        break;
+        
+      case 'FRAUD_ALERT':
+        await this.handleSecurityAlert(event, affectedMFEs);
+        break;
+        
+      case 'SESSION_TIMEOUT_WARNING':
+        await this.handleSessionWarning(event);
+        break;
+    }
+    
+    // Log for audit trail
+    this.auditLogger.logStateChange({
+      eventType: event.type,
+      affectedMFEs,
+      timestamp,
+      userId: event.userId,
+      metadata: event.metadata
+    });
+  }
+  
+  // Advanced Conflict Resolution
+  resolveConflict<T>(
+    currentState: T,
+    incomingState: T,
+    strategy: ConflictResolutionStrategy
+  ): T {
+    
+    switch (strategy) {
+      case 'last_write_wins':
+        return incomingState;
+        
+      case 'merge_deep':
+        return this.deepMerge(currentState, incomingState);
+        
+      case 'user_preference':
+        return this.resolveByUserPreference(currentState, incomingState);
+        
+      case 'banking_priority':
+        return this.resolveBankingConflict(currentState, incomingState);
+        
+      default:
+        throw new Error(`Unknown conflict resolution strategy: ${strategy}`);
+    }
+  }
+  
+  private resolveBankingConflict<T>(current: T, incoming: T): T {
+    // Banking-specific conflict resolution rules
+    
+    // 1. Account balance: Always use server value
+    if (this.isBalanceUpdate(current, incoming)) {
+      return incoming;
+    }
+    
+    // 2. Transaction status: Prioritize completed over pending
+    if (this.isTransactionUpdate(current, incoming)) {
+      return this.prioritizeTransactionStatus(current, incoming);
+    }
+    
+    // 3. Security settings: Always use most restrictive
+    if (this.isSecurityUpdate(current, incoming)) {
+      return this.chooseMostRestrictive(current, incoming);
+    }
+    
+    // 4. User preferences: Merge with server override for critical settings
+    return this.mergeWithBankingRules(current, incoming);
+  }
+}</code></pre>
+                                </div>
+                                
+                                <div class="performance-optimization">
+                                    <h5>Performance Optimization Strategies</h5>
+                                    <pre><code class="language-typescript">// Performance-Optimized State Management
+class PerformantBankingStateManager {
+  private stateCache: Map<string, CachedState> = new Map();
+  private updateQueue: StateUpdate[] = [];
+  private batchTimer: NodeJS.Timeout | null = null;
+  
+  // Intelligent State Caching
+  async getCachedState<T>(
+    stateKey: string, 
+    mfeId: string,
+    maxAge: number = 5000 // 5 seconds default
+  ): Promise<T | null> {
+    
+    const cacheKey = `${mfeId}:${stateKey}`;
+    const cached = this.stateCache.get(cacheKey);
+    
+    if (!cached) return null;
+    
+    // Check if cache is still valid
+    if (Date.now() - cached.timestamp > maxAge) {
+      this.stateCache.delete(cacheKey);
+      return null;
+    }
+    
+    // Banking-specific cache validation
+    if (this.isCriticalBankingData(stateKey)) {
+      // Always validate critical data with server
+      const isValid = await this.validateWithServer(stateKey, cached.data);
+      if (!isValid) {
+        this.stateCache.delete(cacheKey);
+        return null;
+      }
+    }
+    
+    return cached.data as T;
+  }
+  
+  // Batched State Updates for Performance
+  batchStateUpdate(mfeId: string, stateKey: string, value: any): void {
+    this.updateQueue.push({
+      mfeId,
+      stateKey,
+      value,
+      timestamp: Date.now()
+    });
+    
+    // Debounce batch processing
+    if (this.batchTimer) {
+      clearTimeout(this.batchTimer);
+    }
+    
+    this.batchTimer = setTimeout(() => {
+      this.processBatchedUpdates();
+    }, 16); // ~60fps for smooth UI updates
+  }
+  
+  private async processBatchedUpdates(): Promise<void> {
+    if (this.updateQueue.length === 0) return;
+    
+    // Group updates by MFE
+    const updatesByMFE = this.groupUpdatesByMFE(this.updateQueue);
+    
+    // Process updates in parallel
+    await Promise.all(
+      Object.entries(updatesByMFE).map(([mfeId, updates]) =>
+        this.applyBatchedUpdates(mfeId, updates)
+      )
+    );
+    
+    // Clear queue
+    this.updateQueue = [];
+    this.batchTimer = null;
+  }
+  
+  // Memory Management for Large State Objects
+  manageStateMemory(): void {
+    const memoryThreshold = 50 * 1024 * 1024; // 50MB
+    const currentMemory = this.calculateStateMemoryUsage();
+    
+    if (currentMemory > memoryThreshold) {
+      this.optimizeMemoryUsage();
+    }
+  }
+  
+  private optimizeMemoryUsage(): void {
+    // 1. Remove expired cache entries
+    this.cleanExpiredCache();
+    
+    // 2. Compress large state objects
+    this.compressLargeStates();
+    
+    // 3. Offload non-critical data to IndexedDB
+    this.offloadToIndexedDB();
+    
+    // 4. Garbage collect unused MFE states
+    this.garbageCollectUnusedStates();
+  }
+}</code></pre>
+                                </div>
+                            </div>
+                            
                             <div class="error-handling-flow">
                                 <h4>🛡️ Error Handling & Fallback Decision Tree</h4>
                                 <p>Comprehensive error handling ensures banking operations continue even when individual MFEs fail:</p>
@@ -1595,5 +2439,25 @@ class RolloutManager {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="../js/main.js"></script>
+    
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#1B365D',
+                primaryTextColor: '#333',
+                primaryBorderColor: '#4A90E2',
+                lineColor: '#666',
+                secondaryColor: '#F8F9FA',
+                tertiaryColor: '#E3F2FD'
+            },
+            flowchart: {
+                curve: 'basis',
+                padding: 20
+            }
+        });
+    </script>
 </body>
 </html>
