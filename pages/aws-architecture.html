@@ -1,0 +1,3035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Infrastructure Architecture - Banking UI Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html">Banking UI Architecture</a></h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="micro-frontends.html" class="nav-link">Micro Frontends</a>
+                </li>
+                <li class="nav-item">
+                    <a href="aws-architecture.html" class="nav-link active">AWS Infrastructure</a>
+                </li>
+                <li class="nav-item">
+                    <a href="performance.html" class="nav-link">Performance & Scale</a>
+                </li>
+                <li class="nav-item">
+                    <a href="resilience.html" class="nav-link">Resilience & Security</a>
+                </li>
+                <li class="nav-item">
+                    <a href="ai-integration.html" class="nav-link">AI Integration</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>AWS Infrastructure Architecture</h1>
+                <p>Comprehensive cloud infrastructure designed for global banking scale and compliance</p>
+            </div>
+
+            <div class="content-grid">
+                <aside class="sidebar">
+                    <nav class="page-nav">
+                        <h3>Architecture Components</h3>
+                        <ul>
+                            <li><a href="#overview-diagram">Full Architecture</a></li>
+                            <li><a href="#cdn-layer">CDN & Edge</a></li>
+                            <li><a href="#gateway-layer">API Gateway</a></li>
+                            <li><a href="#compute-layer">Compute Layer</a></li>
+                            <li><a href="#data-layer">Data Layer</a></li>
+                            <li><a href="#security-layer">Security & Identity</a></li>
+                            <li><a href="#monitoring">Monitoring & Logging</a></li>
+                            <li><a href="#networking">Networking</a></li>
+                            <li><a href="#cost-optimization">Cost Optimization</a></li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <article class="main-content">
+                    <section id="overview-diagram" class="content-section">
+                        <h2>Complete AWS Architecture Diagram</h2>
+                        <div class="architecture-overview">
+                            <div class="aws-diagram">
+                                <div class="region-container">
+                                    <h3>AWS Multi-Region Architecture</h3>
+                                    
+                                    <!-- Global Services -->
+                                    <div class="global-services">
+                                        <h4>Global Services</h4>
+                                        <div class="service-row">
+                                            <div class="aws-service cloudfront">
+                                                <i class="fas fa-globe"></i>
+                                                <span>CloudFront CDN</span>
+                                                <small>Global Edge Locations</small>
+                                            </div>
+                                            <div class="aws-service route53">
+                                                <i class="fas fa-route"></i>
+                                                <span>Route 53</span>
+                                                <small>DNS & Health Checks</small>
+                                            </div>
+                                            <div class="aws-service waf">
+                                                <i class="fas fa-shield-alt"></i>
+                                                <span>WAF & Shield</span>
+                                                <small>DDoS Protection</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Primary Region (us-east-1) -->
+                                    <div class="aws-region primary">
+                                        <h4>Primary Region (us-east-1)</h4>
+                                        
+                                        <!-- Public Subnets -->
+                                        <div class="subnet-group public">
+                                            <h5>Public Subnets</h5>
+                                            <div class="service-row">
+                                                <div class="aws-service alb">
+                                                    <i class="fas fa-balance-scale"></i>
+                                                    <span>Application Load Balancer</span>
+                                                </div>
+                                                <div class="aws-service nat">
+                                                    <i class="fas fa-network-wired"></i>
+                                                    <span>NAT Gateways</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Private Subnets -->
+                                        <div class="subnet-group private">
+                                            <h5>Private Subnets</h5>
+                                            <div class="service-row">
+                                                <div class="aws-service ecs">
+                                                    <i class="fas fa-cube"></i>
+                                                    <span>ECS Fargate</span>
+                                                    <small>MFE Containers</small>
+                                                </div>
+                                                <div class="aws-service lambda">
+                                                    <i class="fas fa-bolt"></i>
+                                                    <span>Lambda Functions</span>
+                                                    <small>API Services</small>
+                                                </div>
+                                                <div class="aws-service apigateway">
+                                                    <i class="fas fa-door-open"></i>
+                                                    <span>API Gateway</span>
+                                                    <small>REST & GraphQL</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Data Layer -->
+                                        <div class="subnet-group data">
+                                            <h5>Data Subnets</h5>
+                                            <div class="service-row">
+                                                <div class="aws-service rds">
+                                                    <i class="fas fa-database"></i>
+                                                    <span>RDS Aurora</span>
+                                                    <small>Multi-AZ</small>
+                                                </div>
+                                                <div class="aws-service dynamodb">
+                                                    <i class="fas fa-table"></i>
+                                                    <span>DynamoDB</span>
+                                                    <small>Global Tables</small>
+                                                </div>
+                                                <div class="aws-service elasticache">
+                                                    <i class="fas fa-memory"></i>
+                                                    <span>ElastiCache</span>
+                                                    <small>Redis Cluster</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Secondary Region (eu-west-1) -->
+                                    <div class="aws-region secondary">
+                                        <h4>Secondary Region (eu-west-1)</h4>
+                                        <div class="service-row">
+                                            <div class="aws-service standby">
+                                                <i class="fas fa-sync-alt"></i>
+                                                <span>Standby Services</span>
+                                                <small>Active-Active</small>
+                                            </div>
+                                            <div class="aws-service s3-replica">
+                                                <i class="fas fa-copy"></i>
+                                                <span>S3 Cross-Region Replication</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Shared Services -->
+                                    <div class="shared-services">
+                                        <h4>Shared Services</h4>
+                                        <div class="service-row">
+                                            <div class="aws-service s3">
+                                                <i class="fas fa-archive"></i>
+                                                <span>S3 Buckets</span>
+                                                <small>Static Assets</small>
+                                            </div>
+                                            <div class="aws-service cognito">
+                                                <i class="fas fa-users"></i>
+                                                <span>Cognito</span>
+                                                <small>User Management</small>
+                                            </div>
+                                            <div class="aws-service cloudwatch">
+                                                <i class="fas fa-chart-line"></i>
+                                                <span>CloudWatch</span>
+                                                <small>Monitoring</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="architecture-summary">
+                            <h3>AWS Service Selection Rationale</h3>
+                            <div class="service-rationale">
+                                <div class="rationale-section">
+                                    <h4>🏗️ Core Infrastructure Services</h4>
+                                    <div class="service-explanation">
+                                        <div class="service-item">
+                                            <strong>Amazon ECS Fargate</strong>
+                                            <div class="rationale">
+                                                <p><em>Why chosen:</em> Serverless container orchestration eliminates EC2 management overhead while providing isolation for micro frontends. Auto-scaling based on CPU/memory utilization supports 2x YoY growth without capacity planning.</p>
+                                                <p><em>Banking benefit:</em> Meets PCI-DSS compliance requirements with container-level isolation and automated patching.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="service-item">
+                                            <strong>AWS API Gateway</strong>
+                                            <div class="rationale">
+                                                <p><em>Why chosen:</em> Native throttling (10,000 requests/second/account), built-in caching, and request/response transformation. Eliminates need for custom proxy service while providing comprehensive API lifecycle management.</p>
+                                                <p><em>Banking benefit:</em> Built-in DDoS protection and request validation prevents malicious traffic from reaching backend services.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="service-item">
+                                            <strong>Amazon CloudFront + AWS Shield</strong>
+                                            <div class="rationale">
+                                                <p><em>Why chosen:</em> 400+ global edge locations reduce latency to <50ms worldwide. Shield Advanced provides 24/7 DDoS response team and cost protection guarantees up to $1M.</p>
+                                                <p><em>Banking benefit:</em> Meets global banking regulations for data residency while maintaining sub-second page loads across all regions.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="rationale-section">
+                                    <h4>💾 Data Layer Services</h4>
+                                    <div class="service-explanation">
+                                        <div class="service-item">
+                                            <strong>Amazon RDS Aurora Global Database</strong>
+                                            <div class="rationale">
+                                                <p><em>Why chosen:</em> Cross-region replication with <1 second lag, automatic failover in <1 minute. Read replicas scale to 15 instances per cluster supporting read-heavy banking workloads.</p>
+                                                <p><em>Banking benefit:</em> Encryption at rest/transit, automated backups with point-in-time recovery meet SOX compliance requirements.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="service-item">
+                                            <strong>Amazon DynamoDB Global Tables</strong>
+                                            <div class="rationale">
+                                                <p><em>Why chosen:</em> Single-digit millisecond latency, automatic multi-region replication, and on-demand scaling to handle traffic spikes without capacity planning.</p>
+                                                <p><em>Banking benefit:</em> 99.999% availability SLA with automatic failover ensures uninterrupted access to user sessions and entitlements.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="service-item">
+                                            <strong>Amazon ElastiCache Redis Cluster</strong>
+                                            <div class="rationale">
+                                                <p><em>Why chosen:</em> In-memory caching reduces database load by 80%+, supports complex data structures for entitlement policies, and provides pub/sub for real-time MFE communication.</p>
+                                                <p><em>Banking benefit:</em> Encryption in-transit/at-rest with Redis AUTH ensures sensitive session data protection.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="multi-region-details">
+                            <h3>Multi-Region Networking Architecture</h3>
+                            <div class="network-architecture">
+                                <div class="network-diagram">
+                                    <div class="region-connection">
+                                        <div class="aws-region primary-detail">
+                                            <h4>Primary Region (us-east-1)</h4>
+                                            <div class="vpc-details">
+                                                <div class="vpc-info">
+                                                    <strong>VPC CIDR:</strong> 10.0.0.0/16
+                                                    <br><strong>Public Subnets:</strong> 10.0.1.0/24, 10.0.2.0/24, 10.0.3.0/24
+                                                    <br><strong>Private Subnets:</strong> 10.0.10.0/24, 10.0.20.0/24, 10.0.30.0/24
+                                                    <br><strong>DB Subnets:</strong> 10.0.100.0/24, 10.0.200.0/24, 10.0.300.0/24
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="connection-methods">
+                                            <div class="connection-type">
+                                                <h5><i class="fas fa-link"></i> VPC Peering</h5>
+                                                <p>Direct network connection between regions for internal service communication</p>
+                                            </div>
+                                            <div class="connection-type">
+                                                <h5><i class="fas fa-globe"></i> Transit Gateway</h5>
+                                                <p>Central hub for connecting multiple VPCs and on-premises networks</p>
+                                            </div>
+                                            <div class="connection-type">
+                                                <h5><i class="fas fa-shield-alt"></i> PrivateLink</h5>
+                                                <p>Secure, private connectivity to AWS services without internet gateway</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="aws-region secondary-detail">
+                                            <h4>Secondary Region (eu-west-1)</h4>
+                                            <div class="vpc-details">
+                                                <div class="vpc-info">
+                                                    <strong>VPC CIDR:</strong> 10.1.0.0/16
+                                                    <br><strong>Public Subnets:</strong> 10.1.1.0/24, 10.1.2.0/24, 10.1.3.0/24
+                                                    <br><strong>Private Subnets:</strong> 10.1.10.0/24, 10.1.20.0/24, 10.1.30.0/24
+                                                    <br><strong>DB Subnets:</strong> 10.1.100.0/24, 10.1.200.0/24, 10.1.300.0/24
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="routing-table">
+                                    <h4>Network Routing Strategy</h4>
+                                    <table class="routing-details">
+                                        <thead>
+                                            <tr>
+                                                <th>Traffic Type</th>
+                                                <th>Routing Method</th>
+                                                <th>Latency Target</th>
+                                                <th>Failover Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>User Traffic</td>
+                                                <td>Route 53 Health Checks + CloudFront</td>
+                                                <td>&lt; 50ms</td>
+                                                <td>&lt; 30 seconds</td>
+                                            </tr>
+                                            <tr>
+                                                <td>API Calls</td>
+                                                <td>Application Load Balancer + Target Groups</td>
+                                                <td>&lt; 100ms</td>
+                                                <td>&lt; 60 seconds</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Database Replication</td>
+                                                <td>Aurora Global Database</td>
+                                                <td>&lt; 1 second</td>
+                                                <td>&lt; 1 minute</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Static Assets</td>
+                                                <td>S3 Cross-Region Replication</td>
+                                                <td>Edge cached</td>
+                                                <td>Instant</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="scaling-strategies">
+                            <h3>Scaling Strategies for 2x YoY Growth</h3>
+                            <div class="scaling-dimensions">
+                                <div class="scaling-category">
+                                    <h4>🔄 Horizontal Scaling</h4>
+                                    <div class="scaling-methods">
+                                        <div class="scaling-method">
+                                            <strong>ECS Service Auto Scaling</strong>
+                                            <pre><code class="language-yaml">AutoScalingGroup:
+  MinCapacity: 2
+  MaxCapacity: 100
+  TargetValue: 70  # CPU utilization
+  ScaleOutCooldown: 300s
+  ScaleInCooldown: 600s
+  
+# Predictive scaling for known traffic patterns
+PredictiveScaling:
+  Mode: ForecastAndScale
+  SchedulingBufferTime: 600s</code></pre>
+                                        </div>
+                                        
+                                        <div class="scaling-method">
+                                            <strong>API Gateway Throttling</strong>
+                                            <pre><code class="language-yaml">ThrottleSettings:
+  BurstLimit: 5000    # Requests per second
+  RateLimit: 2000     # Steady-state rate
+  
+# Per-client throttling
+UsagePlan:
+  Throttle:
+    RateLimit: 1000
+    BurstLimit: 2000</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="scaling-category">
+                                    <h4>📈 Vertical Scaling</h4>
+                                    <div class="scaling-methods">
+                                        <div class="scaling-method">
+                                            <strong>Fargate CPU/Memory Scaling</strong>
+                                            <pre><code class="language-yaml"># Progressive resource allocation
+TaskDefinition:
+  Small:  { CPU: 256,  Memory: 512  }  # Development
+  Medium: { CPU: 512,  Memory: 1024 }  # Staging  
+  Large:  { CPU: 1024, Memory: 2048 }  # Production
+  XLarge: { CPU: 2048, Memory: 4096 }  # Peak load</code></pre>
+                                        </div>
+                                        
+                                        <div class="scaling-method">
+                                            <strong>Database Read Replica Scaling</strong>
+                                            <pre><code class="language-yaml">AuroraCluster:
+  ReadReplicas:
+    InitialCount: 2
+    MaxCount: 15
+    AutoScaling:
+      TargetCPU: 70
+      ScaleOutCooldown: 300s
+      ScaleInCooldown: 900s</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="scaling-category">
+                                    <h4>🌐 Geographic Scaling</h4>
+                                    <div class="scaling-methods">
+                                        <div class="scaling-method">
+                                            <strong>Regional Expansion Strategy</strong>
+                                            <div class="expansion-roadmap">
+                                                <div class="phase">
+                                                    <strong>Phase 1:</strong> us-east-1, eu-west-1 (Active-Active)
+                                                </div>
+                                                <div class="phase">
+                                                    <strong>Phase 2:</strong> ap-southeast-1 (Asia-Pacific expansion)
+                                                </div>
+                                                <div class="phase">
+                                                    <strong>Phase 3:</strong> ca-central-1, eu-central-1 (Compliance regions)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="scaling-method">
+                                            <strong>Edge Computing with Lambda@Edge</strong>
+                                            <pre><code class="language-javascript">// User entitlement validation at edge
+exports.handler = async (event) => {
+    const request = event.Records[0].cf.request;
+    const headers = request.headers;
+    
+    // Validate JWT token at edge location
+    const token = headers.authorization[0].value;
+    const isValid = await validateToken(token);
+    
+    if (!isValid) {
+        return {
+            status: '401',
+            statusDescription: 'Unauthorized'
+        };
+    }
+    
+    return request;
+};</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="capacity-planning">
+                            <h3>Capacity Planning for Banking Scale</h3>
+                            <div class="capacity-metrics">
+                                <div class="metric-group">
+                                    <h4>Current Baseline (2025)</h4>
+                                    <div class="baseline-stats">
+                                        <div class="stat">
+                                            <span class="value">10M</span>
+                                            <span class="label">Daily Active Users</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="value">500M</span>
+                                            <span class="label">API Calls/Day</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="value">50TB</span>
+                                            <span class="label">Data Transfer/Day</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-group">
+                                    <h4>Projected Scale (2027)</h4>
+                                    <div class="projected-stats">
+                                        <div class="stat growth">
+                                            <span class="value">40M</span>
+                                            <span class="label">Daily Active Users</span>
+                                            <span class="growth-indicator">+300%</span>
+                                        </div>
+                                        <div class="stat growth">
+                                            <span class="value">2B</span>
+                                            <span class="label">API Calls/Day</span>
+                                            <span class="growth-indicator">+300%</span>
+                                        </div>
+                                        <div class="stat growth">
+                                            <span class="value">200TB</span>
+                                            <span class="label">Data Transfer/Day</span>
+                                            <span class="growth-indicator">+300%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="capacity-recommendations">
+                                <h4>Resource Planning Recommendations</h4>
+                                <div class="recommendations-grid">
+                                    <div class="recommendation">
+                                        <h5>Compute Resources</h5>
+                                        <ul>
+                                            <li>Reserve 30% additional Fargate capacity during business hours</li>
+                                            <li>Implement predictive scaling based on historical patterns</li>
+                                            <li>Use Spot instances for non-critical batch processing</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="recommendation">
+                                        <h5>Database Capacity</h5>
+                                        <ul>
+                                            <li>Scale Aurora storage automatically up to 128TB</li>
+                                            <li>Add read replicas proactively in high-traffic regions</li>
+                                            <li>Implement intelligent query caching with ElastiCache</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="recommendation">
+                                        <h5>Network Bandwidth</h5>
+                                        <ul>
+                                            <li>Provision dedicated connections for inter-region traffic</li>
+                                            <li>Implement compression and CDN optimization</li>
+                                            <li>Use VPC endpoints to reduce NAT gateway costs</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="cdn-layer" class="content-section">
+                        <h2>CDN & Edge Infrastructure</h2>
+                        <div class="cdn-architecture">
+                            <div class="cdn-diagram">
+                                <div class="edge-location global">
+                                    <h4>CloudFront Global Edge Network</h4>
+                                    <div class="edge-features">
+                                        <div class="feature">
+                                            <i class="fas fa-globe-americas"></i>
+                                            <span>200+ Edge Locations</span>
+                                        </div>
+                                        <div class="feature">
+                                            <i class="fas fa-bolt"></i>
+                                            <span>Sub-50ms Latency</span>
+                                        </div>
+                                        <div class="feature">
+                                            <i class="fas fa-compress-arrows-alt"></i>
+                                            <span>Automatic Compression</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>CDN Configuration</h3>
+                        <pre><code class="language-yaml"># CloudFormation Template for CloudFront Distribution
+Resources:
+  BankingUIDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - banking.example.com
+          - www.banking.example.com
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt S3Bucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Ref CloudFrontOriginAccessIdentity
+          - Id: APIGatewayOrigin
+            DomainName: !Sub "${APIGateway}.execute-api.${AWS::Region}.amazonaws.com"
+            CustomOriginConfig:
+              HTTPPort: 443
+              OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # Managed-CachingOptimized
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf  # Managed-CORS-S3Origin
+        CacheBehaviors:
+          - PathPattern: "/api/*"
+            TargetOriginId: APIGatewayOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 4cc15a8a-d715-48a4-82b8-cc0b614638fe  # Managed-CachingDisabled
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac  # Managed-AllViewer
+          - PathPattern: "/mfe/*"
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # Managed-CachingOptimizedForUncompressedObjects
+        WebACLId: !Ref WebApplicationFirewall
+        PriceClass: PriceClass_All
+        Enabled: true
+        HttpVersion: http2
+        ViewerCertificate:
+          AcmCertificateArn: !Ref SSLCertificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021</code></pre>
+
+                        <div class="cdn-benefits">
+                            <h3>Edge Optimization Benefits</h3>
+                            <div class="benefit-cards">
+                                <div class="benefit-card">
+                                    <h4>Global Performance</h4>
+                                    <p>Static assets served from nearest edge location, reducing latency by up to 80%</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>Bandwidth Savings</h4>
+                                    <p>Automatic compression and caching reduces origin load by 90%</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>DDoS Protection</h4>
+                                    <p>AWS Shield Standard included, with optional Advanced protection</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="gateway-layer" class="content-section">
+                        <h2>API Gateway Architecture</h2>
+                        <div class="gateway-diagram">
+                            <div class="gateway-flow">
+                                <div class="flow-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <h4>Client Request</h4>
+                                    <p>MFE makes API call</p>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <h4>WAF & Auth</h4>
+                                    <p>Security validation</p>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-door-open"></i>
+                                    </div>
+                                    <h4>API Gateway</h4>
+                                    <p>Route & transform</p>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <h4>Microservice</h4>
+                                    <p>Business logic</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>API Gateway Configuration</h3>
+                        <pre><code class="language-typescript">// API Gateway configuration with Lambda integration
+import { RestApi, LambdaIntegration, AuthorizationType, Cors } from 'aws-cdk-lib/aws-apigateway';
+import { Function } from 'aws-cdk-lib/aws-lambda';
+
+export class BankingAPIGateway extends Construct {
+  constructor(scope: Construct, id: string, props: BankingAPIGatewayProps) {
+    super(scope, id);
+
+    // Create main API Gateway
+    const api = new RestApi(this, 'BankingAPI', {
+      restApiName: 'Banking Micro Frontend API',
+      description: 'API Gateway for banking micro frontends',
+      deployOptions: {
+        stageName: 'prod',
+        throttlingRateLimit: 2000,
+        throttlingBurstLimit: 5000,
+        metricsEnabled: true,
+        loggingLevel: MethodLoggingLevel.INFO,
+        dataTraceEnabled: true,
+        cachingEnabled: true,
+        cacheClusterEnabled: true,
+        cacheClusterSize: '0.5'
+      },
+      defaultCorsPreflightOptions: {
+        allowOrigins: Cors.ALL_ORIGINS,
+        allowMethods: Cors.ALL_METHODS,
+        allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key']
+      }
+    });
+
+    // Create authorizer
+    const authorizer = new CognitoUserPoolsAuthorizer(this, 'BankingAuthorizer', {
+      cognitoUserPools: [props.userPool],
+      identitySource: 'method.request.header.Authorization'
+    });
+
+    // Accounts API
+    const accountsResource = api.root.addResource('accounts');
+    accountsResource.addMethod('GET', new LambdaIntegration(props.accountsLambda), {
+      authorizationType: AuthorizationType.COGNITO,
+      authorizer: authorizer,
+      requestValidator: this.createRequestValidator(api),
+      methodResponses: [{
+        statusCode: '200',
+        responseModels: {
+          'application/json': Model.fromModelName(this, 'AccountsModel', 'AccountsResponse')
+        }
+      }]
+    });
+
+    // Payments API
+    const paymentsResource = api.root.addResource('payments');
+    paymentsResource.addMethod('POST', new LambdaIntegration(props.paymentsLambda), {
+      authorizationType: AuthorizationType.COGNITO,
+      authorizer: authorizer,
+      requestValidator: this.createRequestValidator(api)
+    });
+
+    // Add request/response transformations
+    this.addResponseHeaders(api);
+    this.configureThrottling(api);
+    this.setupWAFIntegration(api);
+  }
+
+  private createRequestValidator(api: RestApi): RequestValidator {
+    return new RequestValidator(this, 'BankingRequestValidator', {
+      restApi: api,
+      validateRequestBody: true,
+      validateRequestParameters: true
+    });
+  }
+}</code></pre>
+
+                        <div class="gateway-features">
+                            <h3>Gateway Features</h3>
+                            <div class="feature-grid">
+                                <div class="feature-item">
+                                    <h4>Rate Limiting</h4>
+                                    <p>2000 requests/second per API key with burst capacity of 5000</p>
+                                </div>
+                                <div class="feature-item">
+                                    <h4>Request Transformation</h4>
+                                    <p>Automatic request/response transformation and validation</p>
+                                </div>
+                                <div class="feature-item">
+                                    <h4>Caching</h4>
+                                    <p>Integrated caching with TTL-based invalidation</p>
+                                </div>
+                                <div class="feature-item">
+                                    <h4>Monitoring</h4>
+                                    <p>CloudWatch metrics, X-Ray tracing, and custom dashboards</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="network-architecture" class="content-section">
+                        <h2>Network-Level Multi-Region Implementation</h2>
+                        
+                        <div class="network-topology">
+                            <h3>Global Network Topology</h3>
+                            <div class="topology-diagram">
+                                <div class="network-layer">
+                                    <h4>🌐 Global DNS & Traffic Routing Strategy</h4>
+                                    <div class="dns-strategy">
+                                        <div class="routing-explanation">
+                                            <div class="routing-method">
+                                                <h5>📍 Geographic Routing (Primary Method)</h5>
+                                                <p><strong>How it works:</strong> Route 53 examines the source IP of the DNS query and routes traffic based on the geographic location of the user, not the origin of the request.</p>
+                                                <div class="routing-details">
+                                                    <div class="detail-item">
+                                                        <strong>North America (NA):</strong> Routes to us-east-1 (Virginia)
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <strong>Europe (EU):</strong> Routes to eu-west-1 (Ireland)
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <strong>Asia Pacific (AS):</strong> Routes to ap-southeast-1 (Singapore)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="routing-method">
+                                                <h5>⚡ Latency-Based Routing (Fallback)</h5>
+                                                <p><strong>How it works:</strong> If geographic routing fails or for uncovered regions, Route 53 automatically routes to the region with the lowest latency based on AWS's network measurements.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="dns-component">
+                                            <strong>Route 53 Configuration</strong>
+                                            <pre><code class="language-yaml"># DNS Records for each region
+BankingDNSRecords:
+  # North America - Primary
+  USEast1Record:
+    Type: A
+    Name: api.bankingmfe.com
+    SetIdentifier: "us-east-1"
+    GeolocationContinentCode: NA
+    AliasTarget:
+      DNSName: !GetAtt USEast1ALB.DNSName
+      EvaluateTargetHealth: true
+    HealthCheckId: !Ref USEast1HealthCheck
+
+  # Europe - Primary  
+  EUWest1Record:
+    Type: A
+    Name: api.bankingmfe.com
+    SetIdentifier: "eu-west-1"
+    GeolocationContinentCode: EU
+    AliasTarget:
+      DNSName: !GetAtt EUWest1ALB.DNSName
+      EvaluateTargetHealth: true
+    HealthCheckId: !Ref EUWest1HealthCheck
+
+  # Asia Pacific - Primary
+  APSoutheast1Record:
+    Type: A
+    Name: api.bankingmfe.com
+    SetIdentifier: "ap-southeast-1"
+    GeolocationContinentCode: AS
+    AliasTarget:
+      DNSName: !GetAtt APSoutheast1ALB.DNSName
+      EvaluateTargetHealth: true
+
+  # Global Fallback (Latency-based)
+  GlobalFallbackRecord:
+    Type: A
+    Name: api.bankingmfe.com
+    SetIdentifier: "global-fallback"
+    GeolocationCountryCode: "*"  # Default for all other locations
+    AliasTarget:
+      DNSName: !GetAtt USEast1ALB.DNSName
+      EvaluateTargetHealth: true</code></pre>
+                                        </div>
+                                        
+                                        <div class="api-gateway-multi-region">
+                                            <strong>🚪 API Gateway Multi-Region Reality</strong>
+                                            <div class="important-note">
+                                                <strong>⚠️ Critical Understanding:</strong> API Gateway is <strong>NOT</strong> automatically replicated across regions. Each region requires separate deployment and configuration.
+                                            </div>
+                                            
+                                            <div class="deployment-strategy">
+                                                <h6>Per-Region API Gateway Deployment</h6>
+                                                <pre><code class="language-yaml"># us-east-1 API Gateway
+USEast1APIGateway:
+  Type: AWS::ApiGateway::RestApi
+  Properties:
+    Name: banking-mfe-api-us-east-1
+    EndpointConfiguration:
+      Types:
+        - REGIONAL  # Regional endpoint, not edge-optimized
+
+# eu-west-1 API Gateway (Separate deployment required)
+EUWest1APIGateway:
+  Type: AWS::ApiGateway::RestApi  
+  Properties:
+    Name: banking-mfe-api-eu-west-1
+    EndpointConfiguration:
+      Types:
+        - REGIONAL</code></pre>
+                                                
+                                                <h6>Multi-Region Deployment Pipeline</h6>
+                                                <pre><code class="language-bash"># Deploy to each region sequentially
+aws cloudformation deploy \
+  --template-file infrastructure.yml \
+  --stack-name banking-mfe-us-east-1 \
+  --region us-east-1 \
+  --parameter-overrides Region=us-east-1
+
+aws cloudformation deploy \
+  --template-file infrastructure.yml \
+  --stack-name banking-mfe-eu-west-1 \
+  --region eu-west-1 \
+  --parameter-overrides Region=eu-west-1
+
+aws cloudformation deploy \
+  --template-file infrastructure.yml \
+  --stack-name banking-mfe-ap-southeast-1 \
+  --region ap-southeast-1 \
+  --parameter-overrides Region=ap-southeast-1</code></pre>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="dns-component">
+                                            <strong>Failover Strategy</strong>
+                                            <div class="failover-logic">
+                                                <div class="failover-step">
+                                                    <span class="step-number">1</span>
+                                                    <div class="step-content">
+                                                        <strong>Health Check Failure</strong>
+                                                        <p>Route 53 detects endpoint failure within 30 seconds</p>
+                                                    </div>
+                                                </div>
+                                                <div class="failover-step">
+                                                    <span class="step-number">2</span>
+                                                    <div class="step-content">
+                                                        <strong>Automatic Routing</strong>
+                                                        <p>Traffic redirected to healthy region with <5 second DNS propagation</p>
+                                                    </div>
+                                                </div>
+                                                <div class="failover-step">
+                                                    <span class="step-number">3</span>
+                                                    <div class="step-content">
+                                                        <strong>State Synchronization</strong>
+                                                        <p>User sessions restored from replicated data stores</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="network-layer">
+                                    <h4>� Cross-Region Data Synchronization</h4>
+                                    <div class="data-sync-strategy">
+                                        <div class="sync-component">
+                                            <h5>Database Replication Strategy</h5>
+                                            <div class="database-sync">
+                                                <div class="sync-method">
+                                                    <strong>RDS Aurora Global Database</strong>
+                                                    <p>Primary region: us-east-1, Read replicas: eu-west-1, ap-southeast-1</p>
+                                                    <div class="sync-metrics">
+                                                        <div class="metric">
+                                                            <strong>Replication Lag:</strong> &lt; 1 second globally
+                                                        </div>
+                                                        <div class="metric">
+                                                            <strong>RPO:</strong> &lt; 1 second (Recovery Point Objective)
+                                                        </div>
+                                                        <div class="metric">
+                                                            <strong>RTO:</strong> &lt; 1 minute (Recovery Time Objective)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="sync-method">
+                                                    <strong>DynamoDB Global Tables</strong>
+                                                    <p>Multi-master replication across all three regions</p>
+                                                    <pre><code class="language-yaml">DynamoDBGlobalTable:
+  Type: AWS::DynamoDB::GlobalTable
+  Properties:
+    TableName: banking-user-sessions
+    BillingMode: PAY_PER_REQUEST
+    StreamSpecification:
+      StreamViewType: NEW_AND_OLD_IMAGES
+    Replicas:
+      - Region: us-east-1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+      - Region: eu-west-1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+      - Region: ap-southeast-1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true</code></pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="sync-component">
+                                            <h5>Session & Cache Synchronization</h5>
+                                            <div class="session-sync">
+                                                <pre><code class="language-typescript">// Cross-region session replication
+export class CrossRegionSessionManager {
+  private regions = ['us-east-1', 'eu-west-1', 'ap-southeast-1'];
+  
+  async replicateSession(sessionId: string, sessionData: any) {
+    const promises = this.regions.map(region => {
+      const dynamoClient = new DynamoDBClient({ region });
+      return dynamoClient.send(new PutItemCommand({
+        TableName: 'banking-user-sessions',
+        Item: {
+          sessionId: { S: sessionId },
+          sessionData: { S: JSON.stringify(sessionData) },
+          ttl: { N: (Date.now() / 1000 + 3600).toString() }, // 1 hour TTL
+          region: { S: region },
+          lastUpdated: { N: Date.now().toString() }
+        }
+      }));
+    });
+    
+    await Promise.all(promises);
+  }
+  
+  async getSession(sessionId: string, preferredRegion: string) {
+    const dynamoClient = new DynamoDBClient({ region: preferredRegion });
+    
+    try {
+      const result = await dynamoClient.send(new GetItemCommand({
+        TableName: 'banking-user-sessions',
+        Key: { sessionId: { S: sessionId } }
+      }));
+      
+      return result.Item ? JSON.parse(result.Item.sessionData.S) : null;
+    } catch (error) {
+      // Fallback to other regions if primary region fails
+      console.error(`Session retrieval failed in ${preferredRegion}, trying fallback regions`);
+      return this.getSessionFallback(sessionId, preferredRegion);
+    }
+  }
+}</code></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="network-layer">
+                                    <h4>�🔗 Inter-Region Connectivity</h4>
+                                    <div class="connectivity-options">
+                                        <div class="connection-type-detail">
+                                            <h5>AWS Transit Gateway Inter-Region Peering</h5>
+                                            <div class="connection-specs">
+                                                <div class="spec-item">
+                                                    <strong>Bandwidth:</strong> Up to 50 Gbps per attachment
+                                                </div>
+                                                <div class="spec-item">
+                                                    <strong>Latency:</strong> Network-optimized routing
+                                                </div>
+                                                <div class="spec-item">
+                                                    <strong>Cost:</strong> $0.05 per GB cross-region transfer
+                                                </div>
+                                            </div>
+                                            <pre><code class="language-yaml">TransitGatewayPeeringAttachment:
+  PeerRegion: eu-west-1
+  PeerTransitGatewayId: tgw-0123456789abcdef0
+  Tags:
+    - Key: Purpose
+      Value: Banking-MFE-InterRegion
+    - Key: Bandwidth
+      Value: 10Gbps</code></pre>
+                                        </div>
+                                        
+                                        <div class="connection-type-detail">
+                                            <h5>AWS PrivateLink Cross-Region</h5>
+                                            <div class="privatelink-config">
+                                                <pre><code class="language-yaml">VPCEndpointService:
+  ServiceName: com.amazonaws.vpce.us-east-1.vpce-svc-abc123
+  AllowedPrincipals:
+    - arn:aws:iam::123456789012:root  # EU region account
+  AcceptanceRequired: false
+  NetworkLoadBalancerArns:
+    - arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/net/banking-api/50dc6c495c0c9188
+
+# Cross-region endpoint in EU
+VPCEndpoint:
+  VpcId: vpc-eu-west-1-banking
+  ServiceName: com.amazonaws.vpce.us-east-1.vpce-svc-abc123
+  RouteTableIds:
+    - rtb-eu-private-1
+    - rtb-eu-private-2</code></pre>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="connection-type-detail">
+                                            <h5>Direct Connect + Virtual Interfaces</h5>
+                                            <div class="dx-architecture">
+                                                <div class="dx-connection">
+                                                    <strong>Primary Connection:</strong> 10 Gbps dedicated fiber
+                                                    <br><strong>Backup Connection:</strong> 5 Gbps hosted connection
+                                                    <br><strong>BGP Routing:</strong> Active-Active with AS-PATH prepending
+                                                </div>
+                                                <pre><code class="language-bash"># BGP Configuration for Multi-Region
+router bgp 65001
+ neighbor 169.254.100.1 remote-as 7224  # AWS ASN
+ neighbor 169.254.100.1 soft-reconfiguration inbound
+ neighbor 169.254.100.1 route-map PREPEND-PATH out
+ 
+route-map PREPEND-PATH permit 10
+ set as-path prepend 65001 65001  # Prefer other path</code></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="network-layer">
+                                    <h4>🛡️ Network Security Implementation</h4>
+                                    <div class="security-layers">
+                                        <div class="security-component">
+                                            <h5>Network ACLs (Subnet Level)</h5>
+                                            <table class="nacl-rules">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Rule #</th>
+                                                        <th>Type</th>
+                                                        <th>Protocol</th>
+                                                        <th>Port Range</th>
+                                                        <th>Source/Destination</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>100</td>
+                                                        <td>Inbound</td>
+                                                        <td>HTTPS</td>
+                                                        <td>443</td>
+                                                        <td>0.0.0.0/0</td>
+                                                        <td>ALLOW</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>110</td>
+                                                        <td>Inbound</td>
+                                                        <td>HTTP</td>
+                                                        <td>80</td>
+                                                        <td>0.0.0.0/0</td>
+                                                        <td>ALLOW</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>120</td>
+                                                        <td>Inbound</td>
+                                                        <td>TCP</td>
+                                                        <td>1024-65535</td>
+                                                        <td>10.0.0.0/8</td>
+                                                        <td>ALLOW</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>200</td>
+                                                        <td>Outbound</td>
+                                                        <td>All</td>
+                                                        <td>All</td>
+                                                        <td>0.0.0.0/0</td>
+                                                        <td>ALLOW</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <div class="security-component">
+                                            <h5>Security Groups (Instance Level)</h5>
+                                            <pre><code class="language-yaml">ALBSecurityGroup:
+  GroupDescription: "Security group for Application Load Balancer"
+  VpcId: !Ref BankingVPC
+  SecurityGroupIngress:
+    - IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+      Description: "HTTPS from internet"
+    - IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+      Description: "HTTP redirect to HTTPS"
+
+ECSSecurityGroup:
+  GroupDescription: "Security group for ECS tasks"
+  VpcId: !Ref BankingVPC
+  SecurityGroupIngress:
+    - IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Description: "Traffic from ALB only"
+    - IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Description: "HTTPS from ALB"</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cost-optimization">
+                            <h3>Cost Optimization Strategies</h3>
+                            <div class="cost-strategies">
+                                <div class="cost-category">
+                                    <h4>💰 Data Transfer Cost Reduction</h4>
+                                    <div class="optimization-methods">
+                                        <div class="method">
+                                            <strong>CloudFront Usage Optimization</strong>
+                                            <div class="savings-potential">Potential Savings: 60-80% on data transfer costs</div>
+                                            <pre><code class="language-yaml"># Optimized caching configuration
+CacheBehaviors:
+  StaticAssets:
+    PathPattern: "*.js|*.css|*.png|*.jpg|*.svg"
+    TTL: 31536000  # 1 year
+    Compress: true
+    
+  APIResponses:
+    PathPattern: "/api/reference/*"
+    TTL: 3600  # 1 hour for reference data
+    CachePolicyId: "CachingOptimized"
+    
+  UserSpecific:
+    PathPattern: "/api/accounts/*"
+    TTL: 0  # No caching for user-specific data
+    CachePolicyId: "CachingDisabled"</code></pre>
+                                        </div>
+                                        
+                                        <div class="method">
+                                            <strong>VPC Endpoints for AWS Services</strong>
+                                            <div class="savings-potential">Potential Savings: $2,000-5,000/month on NAT Gateway costs</div>
+                                            <pre><code class="language-yaml">VPCEndpoints:
+  S3Endpoint:
+    VpcId: !Ref BankingVPC
+    ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+    RouteTableIds: 
+      - !Ref PrivateRouteTable1
+      - !Ref PrivateRouteTable2
+    PolicyDocument:
+      Statement:
+        - Effect: Allow
+          Principal: "*"
+          Action: "s3:*"
+          Resource: 
+            - "arn:aws:s3:::banking-mfe-assets/*"
+  
+  DynamoDBEndpoint:
+    VpcId: !Ref BankingVPC
+    ServiceName: !Sub "com.amazonaws.${AWS::Region}.dynamodb"
+    RouteTableIds: 
+      - !Ref PrivateRouteTable1</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="cost-category">
+                                    <h4>⚡ Compute Cost Optimization</h4>
+                                    <div class="optimization-methods">
+                                        <div class="method">
+                                            <strong>Fargate Spot Integration</strong>
+                                            <div class="savings-potential">Potential Savings: 50-70% on compute costs for batch workloads</div>
+                                            <pre><code class="language-yaml">ECSService:
+  CapacityProviderStrategy:
+    - CapacityProvider: FARGATE
+      Weight: 2
+      Base: 2  # Minimum guaranteed instances
+    - CapacityProvider: FARGATE_SPOT
+      Weight: 8  # 80% of additional capacity
+      
+  # Spot instance configuration
+  TaskDefinition:
+    RequiresCompatibilities:
+      - FARGATE
+    PlatformVersion: LATEST</code></pre>
+                                        </div>
+                                        
+                                        <div class="method">
+                                            <strong>Lambda Provisioned Concurrency Optimization</strong>
+                                            <div class="savings-potential">Potential Savings: 30-40% reduction in cold start latency costs</div>
+                                            <pre><code class="language-python"># Auto-scaling provisioned concurrency
+import boto3
+
+def lambda_handler(event, context):
+    application_autoscaling = boto3.client('application-autoscaling')
+    
+    # Register scalable target
+    response = application_autoscaling.register_scalable_target(
+        ServiceNamespace='lambda',
+        ResourceId='function:banking-api-gateway:provisioned',
+        ScalableDimension='lambda:provisioned-concurrency:utilization',
+        MinCapacity=5,  # Minimum provisioned concurrency
+        MaxCapacity=100,  # Maximum provisioned concurrency
+        RoleArn='arn:aws:iam::123456789012:role/application-autoscaling-lambda-role'
+    )
+    
+    # Create scaling policy
+    application_autoscaling.put_scaling_policy(
+        PolicyName='banking-lambda-scaling-policy',
+        ServiceNamespace='lambda',
+        ResourceId='function:banking-api-gateway:provisioned',
+        ScalableDimension='lambda:provisioned-concurrency:utilization',
+        PolicyType='TargetTrackingScaling',
+        TargetTrackingScalingPolicyConfiguration={
+            'TargetValue': 70.0,  # Target utilization
+            'PredefinedMetricSpecification': {
+                'PredefinedMetricType': 'LambdaProvisionedConcurrencyUtilization'
+            }
+        }
+    )</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="cost-category">
+                                    <h4>📊 Storage Cost Optimization</h4>
+                                    <div class="optimization-methods">
+                                        <div class="method">
+                                            <strong>S3 Intelligent Tiering</strong>
+                                            <div class="savings-potential">Potential Savings: 40-60% on storage costs</div>
+                                            <pre><code class="language-yaml">S3BucketConfiguration:
+  IntelligentTieringConfiguration:
+    Id: "banking-assets-tiering"
+    Status: Enabled
+    Filter:
+      Prefix: "mfe-assets/"
+    Tierings:
+      - Days: 1
+        StorageClass: ARCHIVE_ACCESS
+      - Days: 90
+        StorageClass: DEEP_ARCHIVE_ACCESS
+        
+  LifecycleConfiguration:
+    Rules:
+      - Id: "log-retention"
+        Status: Enabled
+        ExpirationInDays: 2555  # 7 years for banking compliance
+        Transitions:
+          - Days: 30
+            StorageClass: STANDARD_IA
+          - Days: 365
+            StorageClass: GLACIER</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="cost-monitoring">
+                                <h4>Cost Monitoring & Alerting</h4>
+                                <pre><code class="language-yaml">CostBudget:
+  BudgetType: COST
+  TimeUnit: MONTHLY
+  BudgetLimit:
+    Amount: 50000  # $50,000 monthly budget
+    Unit: USD
+  CostFilters:
+    Service:
+      - Amazon Elastic Container Service
+      - AWS Lambda
+      - Amazon CloudFront
+      - Amazon RDS
+  NotificationsWithSubscribers:
+    - Notification:
+        NotificationType: ACTUAL
+        ComparisonOperator: GREATER_THAN
+        Threshold: 80  # Alert at 80% of budget
+      Subscribers:
+        - SubscriptionType: EMAIL
+          Address: "devops-team@bank.com"
+    - Notification:
+        NotificationType: FORECASTED
+        ComparisonOperator: GREATER_THAN
+        Threshold: 100  # Forecast alert at 100%</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="compute-layer" class="content-section">
+                        <h2>Compute Infrastructure</h2>
+                        <div class="compute-architecture">
+                            <div class="compute-section">
+                                <h3>ECS Fargate for Micro Frontends</h3>
+                                <div class="ecs-cluster">
+                                    <div class="service-group">
+                                        <h4>Shell Application Service</h4>
+                                        <div class="task-definition">
+                                            <span>CPU: 0.25 vCPU</span>
+                                            <span>Memory: 512 MB</span>
+                                            <span>Replicas: 3</span>
+                                        </div>
+                                    </div>
+                                    <div class="service-group">
+                                        <h4>Accounts MFE Service</h4>
+                                        <div class="task-definition">
+                                            <span>CPU: 0.5 vCPU</span>
+                                            <span>Memory: 1024 MB</span>
+                                            <span>Replicas: 5</span>
+                                        </div>
+                                    </div>
+                                    <div class="service-group">
+                                        <h4>Payments MFE Service</h4>
+                                        <div class="task-definition">
+                                            <span>CPU: 0.5 vCPU</span>
+                                            <span>Memory: 1024 MB</span>
+                                            <span>Replicas: 5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="compute-section">
+                                <h3>Lambda Functions for APIs</h3>
+                                <div class="lambda-functions">
+                                    <div class="lambda-group">
+                                        <h4>Core Banking APIs</h4>
+                                        <ul>
+                                            <li>Account Management - Node.js 18.x</li>
+                                            <li>Payment Processing - Python 3.11</li>
+                                            <li>Transaction History - Node.js 18.x</li>
+                                            <li>User Profile - Python 3.11</li>
+                                        </ul>
+                                    </div>
+                                    <div class="lambda-group">
+                                        <h4>Utility Functions</h4>
+                                        <ul>
+                                            <li>Authentication Handler</li>
+                                            <li>Data Transformation</li>
+                                            <li>Notification Service</li>
+                                            <li>Audit Logging</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Container Orchestration</h3>
+                        <pre><code class="language-yaml"># ECS Task Definition for Accounts MFE
+family: accounts-mfe
+networkMode: awsvpc
+requiresCompatibilities:
+  - FARGATE
+cpu: 512
+memory: 1024
+executionRoleArn: !Ref ECSExecutionRole
+taskRoleArn: !Ref ECSTaskRole
+
+containerDefinitions:
+  - name: accounts-mfe
+    image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/accounts-mfe:latest"
+    portMappings:
+      - containerPort: 3000
+        protocol: tcp
+    environment:
+      - name: NODE_ENV
+        value: production
+      - name: API_GATEWAY_URL
+        value: !Sub "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com"
+      - name: COGNITO_USER_POOL_ID
+        value: !Ref UserPool
+    secrets:
+      - name: DATABASE_URL
+        valueFrom: !Ref DatabaseSecret
+    logging:
+      logDriver: awslogs
+      options:
+        awslogs-group: !Ref LogGroup
+        awslogs-region: !Ref AWS::Region
+        awslogs-stream-prefix: accounts-mfe
+    healthCheck:
+      command:
+        - CMD-SHELL
+        - curl -f http://localhost:3000/health || exit 1
+      interval: 30
+      timeout: 5
+      retries: 3</code></pre>
+
+                        <div class="auto-scaling">
+                            <h3>Auto Scaling Configuration</h3>
+                            <div class="scaling-policies">
+                                <div class="policy-card">
+                                    <h4>Target Tracking Scaling</h4>
+                                    <ul>
+                                        <li>CPU Utilization: 70%</li>
+                                        <li>Memory Utilization: 80%</li>
+                                        <li>Request Count: 1000/minute</li>
+                                    </ul>
+                                </div>
+                                <div class="policy-card">
+                                    <h4>Predictive Scaling</h4>
+                                    <ul>
+                                        <li>ML-based traffic prediction</li>
+                                        <li>Scale ahead of traffic spikes</li>
+                                        <li>Business hours patterns</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="data-layer" class="content-section">
+                        <h2>Data Layer Architecture & AI Integration Strategy</h2>
+                        
+                        <div class="database-strategy-overview">
+                            <h3>🎯 Why Multiple Database Types? (Polyglot Persistence)</h3>
+                            <div class="strategy-explanation">
+                                <p>Banking applications have diverse data patterns requiring different optimization strategies. Each database type serves specific use cases where it excels:</p>
+                                <div class="data-patterns">
+                                    <div class="pattern-type">
+                                        <strong>Transactional Data:</strong> ACID compliance, complex queries, regulatory compliance
+                                    </div>
+                                    <div class="pattern-type">
+                                        <strong>Session Data:</strong> High throughput, low latency, flexible schema
+                                    </div>
+                                    <div class="pattern-type">
+                                        <strong>Cache Data:</strong> Sub-millisecond access, temporary storage, pub/sub
+                                    </div>
+                                    <div class="pattern-type">
+                                        <strong>Analytics Data:</strong> Massive scale, complex aggregations, cost-effective storage
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="data-architecture">
+                            <div class="database-tier">
+                                <h3>Database Strategy & Use Cases</h3>
+                                <div class="db-services">
+                                    <div class="db-service relational">
+                                        <div class="db-header">
+                                            <h4><i class="fas fa-database"></i> Amazon Aurora PostgreSQL</h4>
+                                            <span class="db-type">RDBMS - Primary System of Record</span>
+                                        </div>
+                                        
+                                        <div class="use-cases-detailed">
+                                            <h5>🏦 Primary Use Cases:</h5>
+                                            <div class="use-case-grid">
+                                                <div class="use-case">
+                                                    <strong>Core Banking Transactions</strong>
+                                                    <p>Account balances, transfers, deposits, withdrawals requiring ACID compliance</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Customer Master Data</strong>
+                                                    <p>KYC information, account profiles, relationship hierarchies</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Regulatory & Compliance</strong>
+                                                    <p>Audit trails, regulatory reports, transaction history for 7+ years</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Complex Financial Reporting</strong>
+                                                    <p>Multi-table joins, aggregations, balance calculations, statements</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <h5>💡 Why Aurora PostgreSQL?</h5>
+                                            <div class="rationale-points">
+                                                <div class="rationale-item">
+                                                    <strong>ACID Compliance:</strong> Essential for financial transactions - atomicity, consistency, isolation, durability
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Complex Queries:</strong> SQL joins, window functions, stored procedures for financial calculations
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Data Integrity:</strong> Foreign keys, constraints, triggers for business rule enforcement
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Regulatory Requirements:</strong> Banking regulations require structured, auditable, immutable transaction records
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="implementation-details">
+                                            <pre><code class="language-sql">-- Core banking schema with strict constraints
+CREATE TABLE accounts (
+    account_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID NOT NULL REFERENCES customers(customer_id),
+    account_number VARCHAR(20) UNIQUE NOT NULL,
+    account_type account_type_enum NOT NULL,
+    balance DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    currency CHAR(3) NOT NULL DEFAULT 'USD',
+    status account_status_enum NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Compliance fields
+    regulatory_classification VARCHAR(50),
+    last_statement_date DATE,
+    kyc_status kyc_status_enum NOT NULL,
+    
+    -- Constraints for data integrity
+    CONSTRAINT positive_balance CHECK (balance >= 0 OR account_type = 'CREDIT'),
+    CONSTRAINT valid_currency CHECK (currency IN ('USD', 'EUR', 'GBP', 'CAD'))
+);
+
+-- Transaction table with full audit trail
+CREATE TABLE transactions (
+    transaction_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID NOT NULL REFERENCES accounts(account_id),
+    transaction_type transaction_type_enum NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    balance_before DECIMAL(15,2) NOT NULL,
+    balance_after DECIMAL(15,2) NOT NULL,
+    description TEXT,
+    reference_number VARCHAR(50) UNIQUE,
+    
+    -- Temporal tracking
+    transaction_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    value_date DATE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Audit and compliance
+    created_by UUID NOT NULL,
+    channel VARCHAR(20) NOT NULL, -- 'WEB', 'MOBILE', 'API', 'BRANCH'
+    ip_address INET,
+    audit_trail JSONB NOT NULL,
+    
+    -- Immutability - no updates allowed after creation
+    CONSTRAINT immutable_transaction CHECK (created_at = updated_at)
+);</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="db-service nosql">
+                                        <div class="db-header">
+                                            <h4><i class="fas fa-table"></i> DynamoDB Global Tables</h4>
+                                            <span class="db-type">NoSQL - High-Performance Operational Data</span>
+                                        </div>
+                                        
+                                        <div class="use-cases-detailed">
+                                            <h5>⚡ Primary Use Cases:</h5>
+                                            <div class="use-case-grid">
+                                                <div class="use-case">
+                                                    <strong>User Sessions & Authentication</strong>
+                                                    <p>JWT tokens, session state, multi-factor auth codes, device fingerprints</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Real-time User Preferences</strong>
+                                                    <p>Dashboard layouts, notification settings, personalization data</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>MFE Configuration</strong>
+                                                    <p>Feature flags, A/B test assignments, UI configurations per user</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Activity Tracking</strong>
+                                                    <p>User interactions, click streams, performance metrics, error logs</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <h5>🚀 Why DynamoDB?</h5>
+                                            <div class="rationale-points">
+                                                <div class="rationale-item">
+                                                    <strong>Single-Digit Millisecond Latency:</strong> Critical for real-time user experience and session management
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Automatic Scaling:</strong> Handles traffic spikes during market hours without manual intervention
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Global Tables:</strong> Multi-region replication for session continuity across regions
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Flexible Schema:</strong> Different MFEs can store varying data structures without schema migrations
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="implementation-details">
+                                            <pre><code class="language-javascript">// User session management with Global Tables
+const sessionSchema = {
+    TableName: 'banking-user-sessions',
+    KeySchema: [
+        { AttributeName: 'user_id', KeyType: 'HASH' },      // Partition key
+        { AttributeName: 'session_id', KeyType: 'RANGE' }    // Sort key
+    ],
+    GlobalSecondaryIndexes: [
+        {
+            IndexName: 'session-lookup-index',
+            KeySchema: [
+                { AttributeName: 'session_token', KeyType: 'HASH' }
+            ]
+        }
+    ]
+};
+
+// Session data structure
+const createSession = async (userId, sessionData) => {
+    const sessionItem = {
+        user_id: userId,
+        session_id: `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        session_token: generateSecureToken(),
+        
+        // Session metadata
+        session_data: {
+            authenticated: true,
+            mfa_verified: true,
+            permissions: ['accounts.read', 'transfers.create', 'statements.read'],
+            device_info: {
+                user_agent: sessionData.userAgent,
+                ip_address: sessionData.ipAddress,
+                device_fingerprint: sessionData.fingerprint
+            },
+            preferences: {
+                dashboard_layout: 'grid',
+                theme: 'light',
+                language: 'en-US',
+                timezone: 'America/New_York'
+            }
+        },
+        
+        // Automatic cleanup with TTL
+        ttl: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+        
+        // Timestamps
+        created_at: new Date().toISOString(),
+        last_accessed: new Date().toISOString(),
+        
+        // Regional info for Global Tables
+        origin_region: 'us-east-1',
+        replicated_regions: ['eu-west-1', 'ap-southeast-1']
+    };
+    
+    await dynamoClient.putItem({
+        TableName: 'banking-user-sessions',
+        Item: marshall(sessionItem)
+    });
+};</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="db-service cache">
+                                        <div class="db-header">
+                                            <h4><i class="fas fa-memory"></i> ElastiCache Redis</h4>
+                                            <span class="db-type">In-Memory Cache - Ultra-Fast Data Access</span>
+                                        </div>
+                                        
+                                        <div class="use-cases-detailed">
+                                            <h5>🔥 Primary Use Cases:</h5>
+                                            <div class="use-case-grid">
+                                                <div class="use-case">
+                                                    <strong>API Response Caching</strong>
+                                                    <p>Account balances, transaction history, reference data with TTL-based invalidation</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Rate Limiting & Fraud Prevention</strong>
+                                                    <p>API throttling counters, failed login attempts, transaction velocity checks</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Real-time Pub/Sub</strong>
+                                                    <p>Live notifications, balance updates, system alerts between MFEs</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Distributed Locking</strong>
+                                                    <p>Prevent concurrent transactions, ensure atomic operations across services</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <h5>⚡ Why Redis?</h5>
+                                            <div class="rationale-points">
+                                                <div class="rationale-item">
+                                                    <strong>Sub-millisecond Latency:</strong> Memory-based storage for instant access to frequently used data
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Rich Data Structures:</strong> Lists, sets, sorted sets, hashes for complex caching patterns
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Atomic Operations:</strong> Thread-safe operations critical for concurrent banking operations
+                                                </div>
+                                                <div class="rationale-item">
+                                                    <strong>Pub/Sub Messaging:</strong> Real-time communication between microservices and MFEs
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="implementation-details">
+                                            <pre><code class="language-python">import redis
+import json
+from datetime import timedelta
+
+class BankingCacheManager:
+    def __init__(self):
+        self.redis_client = redis.Redis(
+            host='banking-cache.cluster.amazonaws.com',
+            port=6379,
+            decode_responses=True,
+            ssl=True  # Encryption in transit
+        )
+    
+    # Multi-layer caching strategy
+    def get_account_balance(self, account_id):
+        """L1 Cache: Account balance with 30-second TTL"""
+        cache_key = f"balance:{account_id}"
+        cached = self.redis_client.get(cache_key)
+        
+        if cached:
+            return json.loads(cached)
+        
+        # Cache miss - fetch from database and cache
+        balance_data = self.fetch_from_database(account_id)
+        self.redis_client.setex(cache_key, 30, json.dumps(balance_data))
+        return balance_data
+    
+    # Rate limiting for fraud prevention
+    def check_rate_limit(self, user_id, action, limit=10, window=300):
+        """Sliding window rate limiting"""
+        key = f"rate_limit:{user_id}:{action}"
+        
+        with self.redis_client.pipeline() as pipe:
+            pipe.incr(key, 1)
+            pipe.expire(key, window)
+            results = pipe.execute()
+            
+        return results[0] <= limit
+    
+    # Real-time notifications
+    def publish_balance_update(self, account_id, new_balance):
+        """Publish real-time balance updates to MFEs"""
+        channel = f"account_updates:{account_id}"
+        message = {
+            'type': 'balance_update',
+            'account_id': account_id,
+            'new_balance': new_balance,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        self.redis_client.publish(channel, json.dumps(message))
+    
+    # Distributed locking for atomic operations
+    def acquire_transaction_lock(self, account_id, timeout=10):
+        """Prevent concurrent transactions on same account"""
+        lock_key = f"lock:transaction:{account_id}"
+        identifier = str(uuid.uuid4())
+        
+        # Try to acquire lock
+        if self.redis_client.set(lock_key, identifier, nx=True, ex=timeout):
+            return identifier
+        return None</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="db-service analytics">
+                                        <div class="db-header">
+                                            <h4><i class="fas fa-archive"></i> S3 Data Lake + Vector DB</h4>
+                                            <span class="db-type">Analytics & AI/ML Data Store</span>
+                                        </div>
+                                        
+                                        <div class="use-cases-detailed">
+                                            <h5>🧠 Primary Use Cases:</h5>
+                                            <div class="use-case-grid">
+                                                <div class="use-case">
+                                                    <strong>Historical Analytics</strong>
+                                                    <p>Transaction patterns, customer behavior, compliance reporting, data warehouse</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>AI/ML Training Data</strong>
+                                                    <p>Fraud detection models, recommendation engines, risk assessment algorithms</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Vector Embeddings</strong>
+                                                    <p>Customer similarity, transaction pattern matching, personalized recommendations</p>
+                                                </div>
+                                                <div class="use-case">
+                                                    <strong>Audit & Compliance</strong>
+                                                    <p>Immutable audit logs, regulatory data retention, forensic analysis</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-integration-strategy">
+                            <h3>🤖 AI Integration Strategy for Long-term Evolution</h3>
+                            
+                            <div class="ai-overview">
+                                <div class="ai-vision">
+                                    <h4>AI-Powered Banking Platform Vision</h4>
+                                    <p>The banking platform evolves from static micro frontends to intelligent, adaptive systems that learn from user behavior and optimize experiences in real-time.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-capabilities">
+                                <div class="ai-capability">
+                                    <h4>🎯 Intelligent Personalization Engine</h4>
+                                    <div class="capability-details">
+                                        <div class="ai-use-case">
+                                            <strong>Smart Dashboard Layouts:</strong>
+                                            <p>AI analyzes user interaction patterns to automatically optimize dashboard widget placement, sizes, and content prioritization.</p>
+                                            <div class="technical-implementation">
+                                                <pre><code class="language-python"># AI-powered dashboard optimization
+class SmartDashboardAI:
+    def __init__(self):
+                                                self.vector_db = PineconeClient()  # User behavior embeddings
+        self.ml_model = load_model('dashboard_optimizer_v2.joblib')
+    
+    async def optimize_user_dashboard(self, user_id: str):
+        # Get user behavior vector
+        user_vector = await self.get_user_behavior_embedding(user_id)
+        
+        # Find similar users
+        similar_users = await self.vector_db.query(
+            vector=user_vector,
+            top_k=10,
+            include_metadata=True
+        )
+        
+        # Generate personalized layout
+        optimal_layout = self.ml_model.predict([{
+            'user_features': user_vector,
+            'similar_users': similar_users,
+            'time_of_day': datetime.now().hour,
+            'day_of_week': datetime.now().weekday(),
+            'account_types': await self.get_user_account_types(user_id)
+        }])
+        
+        return optimal_layout</code></pre>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="ai-use-case">
+                                            <strong>Predictive Content Loading:</strong>
+                                            <p>Machine learning predicts which MFE components users will likely access next, pre-loading them for instant navigation.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="ai-capability">
+                                    <h4>🔍 Real-time Fraud Detection</h4>
+                                    <div class="capability-details">
+                                        <div class="ai-use-case">
+                                            <strong>Behavioral Anomaly Detection:</strong>
+                                            <p>Continuously learns normal user patterns and flags anomalous behavior instantly using streaming ML on transaction data.</p>
+                                            <div class="technical-implementation">
+                                                <pre><code class="language-python"># Real-time fraud detection pipeline
+class FraudDetectionAI:
+    def __init__(self):
+        self.kinesis_client = boto3.client('kinesis')
+        self.sagemaker_endpoint = 'fraud-detection-endpoint'
+        self.redis_client = redis.Redis()
+    
+    async def analyze_transaction_risk(self, transaction_data):
+        # Real-time feature engineering
+        features = await self.extract_features(transaction_data)
+        
+        # Get user's historical pattern from vector DB
+        user_pattern = await self.get_user_transaction_pattern(
+            transaction_data['user_id']
+        )
+        
+        # Real-time ML inference
+        risk_score = await self.invoke_sagemaker_endpoint({
+            'transaction_features': features,
+            'user_pattern': user_pattern,
+            'contextual_data': {
+                'time_since_last_transaction': features['time_diff'],
+                'location_change': features['location_anomaly'],
+                'amount_deviation': features['amount_z_score']
+            }
+        })
+        
+        # Immediate action based on risk score
+        if risk_score > 0.8:
+            await self.trigger_immediate_review(transaction_data)
+        elif risk_score > 0.6:
+            await self.request_additional_auth(transaction_data)
+        
+        return risk_score</code></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="ai-capability">
+                                    <h4>💬 Conversational Banking Assistant</h4>
+                                    <div class="capability-details">
+                                        <div class="ai-use-case">
+                                            <strong>Context-Aware Chat Bot:</strong>
+                                            <p>LLM-powered assistant with access to user's banking data through RAG, providing personalized financial advice and transaction assistance.</p>
+                                            <div class="technical-implementation">
+                                                <pre><code class="language-python"># Banking AI Assistant with RAG
+class BankingAIAssistant:
+    def __init__(self):
+        self.llm_client = OpenAI()
+        self.vector_store = ChromaDB()
+        self.banking_kb = self.load_banking_knowledge_base()
+    
+    async def process_user_query(self, user_id: str, query: str):
+        # Get user context from multiple databases
+        user_context = await self.gather_user_context(user_id)
+        
+        # Retrieve relevant banking knowledge
+        relevant_docs = await self.vector_store.similarity_search(
+            query=query,
+            filter={'user_permissions': user_context['permissions']},
+            k=5
+        )
+        
+        # Generate contextual response
+        response = await self.llm_client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""You are a banking assistant with access to:
+                    - User's account balances: {user_context['balances']}
+                    - Recent transactions: {user_context['recent_transactions']}
+                    - User preferences: {user_context['preferences']}
+                    
+                    Banking knowledge: {relevant_docs}
+                    
+                    Provide helpful, accurate banking assistance while maintaining privacy and security."""
+                },
+                {
+                    "role": "user",
+                    "content": query
+                }
+            ]
+        )
+        
+        # Log interaction for continuous learning
+        await self.log_interaction(user_id, query, response)
+        
+        return response.choices[0].message.content</code></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="ai-capability">
+                                    <h4>📊 Predictive Analytics & Insights</h4>
+                                    <div class="capability-details">
+                                        <div class="ai-use-case">
+                                            <strong>Spending Pattern Analysis:</strong>
+                                            <p>ML models analyze transaction history to provide insights on spending patterns, budget recommendations, and financial health scores.</p>
+                                        </div>
+                                        
+                                        <div class="ai-use-case">
+                                            <strong>Proactive Notifications:</strong>
+                                            <p>Predict when users might exceed budgets, identify unusual spending, or suggest optimal times for major purchases.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-infrastructure">
+                                <h4>🏗️ AI Infrastructure Components</h4>
+                                <div class="ai-tech-stack">
+                                    <div class="ai-component">
+                                        <h5>Vector Database (Pinecone/Weaviate)</h5>
+                                        <p>Store user behavior embeddings, transaction patterns, and similarity searches</p>
+                                    </div>
+                                    <div class="ai-component">
+                                        <h5>Amazon SageMaker</h5>
+                                        <p>ML model training, deployment, and real-time inference endpoints</p>
+                                    </div>
+                                    <div class="ai-component">
+                                        <h5>Amazon Bedrock</h5>
+                                        <p>Foundation models for conversational AI and document analysis</p>
+                                    </div>
+                                    <div class="ai-component">
+                                        <h5>Kinesis Analytics</h5>
+                                        <p>Real-time stream processing for fraud detection and behavior analysis</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-evolution-timeline">
+                                <h4>📈 AI Evolution Timeline</h4>
+                                <div class="timeline">
+                                    <div class="timeline-phase">
+                                        <div class="phase-marker">Phase 1</div>
+                                        <div class="phase-content">
+                                            <strong>Basic Analytics (0-6 months)</strong>
+                                            <p>User behavior tracking, basic personalization, simple recommendation engine</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-phase">
+                                        <div class="phase-marker">Phase 2</div>
+                                        <div class="phase-content">
+                                            <strong>Intelligent Automation (6-12 months)</strong>
+                                            <p>Fraud detection, predictive loading, smart notifications, basic chatbot</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-phase">
+                                        <div class="phase-marker">Phase 3</div>
+                                        <div class="phase-content">
+                                            <strong>Adaptive Intelligence (12-18 months)</strong>
+                                            <p>Self-optimizing UIs, advanced conversational AI, predictive financial advice</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-phase">
+                                        <div class="phase-marker">Phase 4</div>
+                                        <div class="phase-content">
+                                            <strong>Autonomous Banking (18+ months)</strong>
+                                            <p>Fully autonomous financial management, AI-driven investment advice, predictive banking</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Data Access Patterns</h3>
+                        <pre><code class="language-typescript">// Data access layer with caching strategy
+export class BankingDataService {
+  private rdsClient: RDSClient;
+  private dynamoClient: DynamoDBClient;
+  private redisClient: RedisClient;
+
+  async getUserAccount(userId: string): Promise<Account> {
+    // L1 Cache: Check Redis first
+    const cached = await this.redisClient.get(`account:${userId}`);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    // L2 Cache: Check DynamoDB for frequently accessed data
+    try {
+      const dynamoResult = await this.dynamoClient.send(new GetItemCommand({
+        TableName: 'user-accounts-cache',
+        Key: { userId: { S: userId } }
+      }));
+      
+      if (dynamoResult.Item) {
+        const account = this.unmarshall(dynamoResult.Item);
+        // Cache in Redis for 5 minutes
+        await this.redisClient.setex(`account:${userId}`, 300, JSON.stringify(account));
+        return account;
+      }
+    } catch (error) {
+      console.warn('DynamoDB cache miss, falling back to RDS');
+    }
+
+    // Primary Source: Aurora PostgreSQL
+    const account = await this.rdsClient.query(
+      'SELECT * FROM accounts WHERE user_id = $1',
+      [userId]
+    );
+
+    // Update caches asynchronously
+    this.updateCaches(userId, account);
+    
+    return account;
+  }
+
+  private async updateCaches(userId: string, account: Account): Promise<void> {
+    // Update Redis cache
+    await this.redisClient.setex(
+      `account:${userId}`, 
+      300, 
+      JSON.stringify(account)
+    );
+
+    // Update DynamoDB cache
+    await this.dynamoClient.send(new PutItemCommand({
+      TableName: 'user-accounts-cache',
+      Item: this.marshall({
+        userId,
+        ...account,
+        ttl: Math.floor(Date.now() / 1000) + 3600 // 1 hour TTL
+      })
+    }));
+  }
+}</code></pre>
+
+                        <div class="data-consistency">
+                            <h3>Data Consistency Strategy</h3>
+                            <div class="consistency-patterns">
+                                <div class="pattern">
+                                    <h4>Eventual Consistency</h4>
+                                    <p>User preferences and non-critical data using DynamoDB Global Tables</p>
+                                </div>
+                                <div class="pattern">
+                                    <h4>Strong Consistency</h4>
+                                    <p>Financial transactions and account balances using Aurora with synchronous replication</p>
+                                </div>
+                                <div class="pattern">
+                                    <h4>Cache Invalidation</h4>
+                                    <p>Event-driven cache invalidation using SNS/SQS for real-time updates</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="security-layer" class="content-section">
+                        <h2>Security & Identity Management</h2>
+                        <div class="security-architecture">
+                            <h3>Authentication & Authorization Flow</h3>
+                            <div class="auth-flow">
+                                <div class="auth-step">
+                                    <div class="step-number">1</div>
+                                    <h4>User Login</h4>
+                                    <p>Cognito User Pool authentication with MFA</p>
+                                </div>
+                                <div class="auth-step">
+                                    <div class="step-number">2</div>
+                                    <h4>Token Validation</h4>
+                                    <p>JWT token validation at API Gateway</p>
+                                </div>
+                                <div class="auth-step">
+                                    <div class="step-number">3</div>
+                                    <h4>Authorization</h4>
+                                    <p>IAM roles and policies for resource access</p>
+                                </div>
+                                <div class="auth-step">
+                                    <div class="step-number">4</div>
+                                    <h4>MFE Access</h4>
+                                    <p>Entitlement service determines available MFEs</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Entitlement Framework</h3>
+                        <pre><code class="language-typescript">// Entitlement service for dynamic MFE loading
+export class EntitlementService {
+  async getUserEntitlements(userId: string, userRoles: string[]): Promise<MFEEntitlements> {
+    const entitlements: MFEEntitlements = {
+      availableMFEs: [],
+      permissions: {},
+      uiComponents: {}
+    };
+
+    // Check role-based entitlements
+    for (const role of userRoles) {
+      const roleEntitlements = await this.getRoleEntitlements(role);
+      entitlements.availableMFEs.push(...roleEntitlements.mfes);
+      
+      // Merge permissions
+      Object.assign(entitlements.permissions, roleEntitlements.permissions);
+    }
+
+    // Check geographic restrictions
+    const userLocation = await this.getUserLocation(userId);
+    entitlements.availableMFEs = this.filterByGeography(
+      entitlements.availableMFEs, 
+      userLocation
+    );
+
+    // Check compliance requirements
+    const complianceChecks = await this.runComplianceChecks(userId);
+    if (!complianceChecks.passed) {
+      entitlements.availableMFEs = this.filterByCompliance(
+        entitlements.availableMFEs,
+        complianceChecks.restrictions
+      );
+    }
+
+    // Determine UI component visibility
+    entitlements.uiComponents = this.calculateUIComponents(entitlements);
+
+    return entitlements;
+  }
+
+  private async getRoleEntitlements(role: string): Promise<RoleEntitlements> {
+    const policyDocument = await this.iamClient.getPolicy({
+      PolicyArn: `arn:aws:iam::${ACCOUNT_ID}:policy/BankingRole-${role}`
+    });
+
+    return this.parseEntitlementsFromPolicy(policyDocument);
+  }
+
+  private filterByGeography(mfes: string[], location: UserLocation): string[] {
+    const geoRestrictions = {
+      'investments-mfe': ['US', 'EU'],
+      'crypto-mfe': ['US'], // Restricted in some regions
+      'lending-mfe': ['US', 'EU', 'APAC']
+    };
+
+    return mfes.filter(mfe => {
+      const allowedRegions = geoRestrictions[mfe] || ['GLOBAL'];
+      return allowedRegions.includes(location.region) || allowedRegions.includes('GLOBAL');
+    });
+  }
+}</code></pre>
+
+                        <div class="security-measures">
+                            <h3>Security Controls</h3>
+                            <div class="security-grid">
+                                <div class="security-item">
+                                    <h4>Network Security</h4>
+                                    <ul>
+                                        <li>VPC with private subnets</li>
+                                        <li>NAT Gateways for outbound traffic</li>
+                                        <li>Security Groups and NACLs</li>
+                                        <li>AWS PrivateLink for service communication</li>
+                                    </ul>
+                                </div>
+                                <div class="security-item">
+                                    <h4>Data Protection</h4>
+                                    <ul>
+                                        <li>Encryption at rest (KMS)</li>
+                                        <li>Encryption in transit (TLS 1.3)</li>
+                                        <li>Field-level encryption for PII</li>
+                                        <li>Secrets Manager for credentials</li>
+                                    </ul>
+                                </div>
+                                <div class="security-item">
+                                    <h4>Access Control</h4>
+                                    <ul>
+                                        <li>IAM roles with least privilege</li>
+                                        <li>MFA enforcement</li>
+                                        <li>Session timeout controls</li>
+                                        <li>API rate limiting</li>
+                                    </ul>
+                                </div>
+                                <div class="security-item">
+                                    <h4>Compliance</h4>
+                                    <ul>
+                                        <li>SOC 2 Type II compliance</li>
+                                        <li>PCI DSS for payment data</li>
+                                        <li>GDPR for EU customers</li>
+                                        <li>Audit logging (CloudTrail)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="monitoring" class="content-section">
+                        <h2>Monitoring & Observability</h2>
+                        <div class="monitoring-stack">
+                            <h3>Comprehensive Monitoring Strategy</h3>
+                            <div class="monitoring-layers">
+                                <div class="layer">
+                                    <h4>Infrastructure Monitoring</h4>
+                                    <ul>
+                                        <li>CloudWatch metrics for all AWS services</li>
+                                        <li>Custom metrics for business KPIs</li>
+                                        <li>Infrastructure health dashboards</li>
+                                        <li>Automated alerting and notifications</li>
+                                    </ul>
+                                </div>
+                                <div class="layer">
+                                    <h4>Application Performance Monitoring</h4>
+                                    <ul>
+                                        <li>X-Ray distributed tracing</li>
+                                        <li>Real User Monitoring (RUM)</li>
+                                        <li>Synthetic monitoring with CloudWatch Synthetics</li>
+                                        <li>Performance budgets and SLA tracking</li>
+                                    </ul>
+                                </div>
+                                <div class="layer">
+                                    <h4>Security Monitoring</h4>
+                                    <ul>
+                                        <li>AWS CloudTrail for API auditing</li>
+                                        <li>AWS GuardDuty for threat detection</li>
+                                        <li>AWS Config for compliance monitoring</li>
+                                        <li>Security Information and Event Management (SIEM)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Monitoring Implementation</h3>
+                        <pre><code class="language-typescript">// CloudWatch custom metrics and alarms
+export class BankingMonitoring {
+  private cloudWatch: CloudWatchClient;
+
+  async setupMonitoring(): Promise<void> {
+    // Business metrics
+    await this.createBusinessMetrics();
+    
+    // Performance alarms
+    await this.createPerformanceAlarms();
+    
+    // Security alarms
+    await this.createSecurityAlarms();
+    
+    // Custom dashboards
+    await this.createDashboards();
+  }
+
+  private async createBusinessMetrics(): Promise<void> {
+    // Transaction volume metric
+    await this.cloudWatch.send(new PutMetricAlarmCommand({
+      AlarmName: 'HighTransactionVolume',
+      ComparisonOperator: 'GreaterThanThreshold',
+      EvaluationPeriods: 2,
+      MetricName: 'TransactionCount',
+      Namespace: 'Banking/Transactions',
+      Period: 300,
+      Statistic: 'Sum',
+      Threshold: 10000,
+      ActionsEnabled: true,
+      AlarmActions: [
+        'arn:aws:sns:us-east-1:123456789012:banking-alerts'
+      ],
+      AlarmDescription: 'Alert when transaction volume exceeds threshold'
+    }));
+
+    // Error rate alarm
+    await this.cloudWatch.send(new PutMetricAlarmCommand({
+      AlarmName: 'HighErrorRate',
+      ComparisonOperator: 'GreaterThanThreshold',
+      EvaluationPeriods: 3,
+      MetricName: 'ErrorRate',
+      Namespace: 'Banking/API',
+      Period: 300,
+      Statistic: 'Average',
+      Threshold: 0.01, // 1% error rate
+      ActionsEnabled: true,
+      AlarmActions: [
+        'arn:aws:sns:us-east-1:123456789012:banking-critical-alerts'
+      ]
+    }));
+  }
+
+  async recordCustomMetric(metricName: string, value: number, unit: string): Promise<void> {
+    await this.cloudWatch.send(new PutMetricDataCommand({
+      Namespace: 'Banking/CustomMetrics',
+      MetricData: [{
+        MetricName: metricName,
+        Value: value,
+        Unit: unit,
+        Timestamp: new Date(),
+        Dimensions: [{
+          Name: 'Environment',
+          Value: process.env.ENVIRONMENT || 'production'
+        }]
+      }]
+    }));
+  }
+}</code></pre>
+                    </section>
+
+                    <section id="networking" class="content-section">
+                        <h2>Network Architecture</h2>
+                        <div class="network-topology">
+                            <h3>VPC Design</h3>
+                            <div class="vpc-diagram">
+                                <div class="vpc-container">
+                                    <h4>Banking VPC (10.0.0.0/16)</h4>
+                                    
+                                    <div class="availability-zones">
+                                        <div class="az">
+                                            <h5>Availability Zone A</h5>
+                                            <div class="subnet public">Public Subnet (10.0.1.0/24)</div>
+                                            <div class="subnet private">Private Subnet (10.0.2.0/24)</div>
+                                            <div class="subnet data">Data Subnet (10.0.3.0/24)</div>
+                                        </div>
+                                        
+                                        <div class="az">
+                                            <h5>Availability Zone B</h5>
+                                            <div class="subnet public">Public Subnet (10.0.4.0/24)</div>
+                                            <div class="subnet private">Private Subnet (10.0.5.0/24)</div>
+                                            <div class="subnet data">Data Subnet (10.0.6.0/24)</div>
+                                        </div>
+                                        
+                                        <div class="az">
+                                            <h5>Availability Zone C</h5>
+                                            <div class="subnet public">Public Subnet (10.0.7.0/24)</div>
+                                            <div class="subnet private">Private Subnet (10.0.8.0/24)</div>
+                                            <div class="subnet data">Data Subnet (10.0.9.0/24)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Network Security</h3>
+                        <pre><code class="language-yaml"># Security Groups Configuration
+PublicLoadBalancerSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: Security group for public load balancer
+    VpcId: !Ref VPC
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+        Description: HTTPS from internet
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+        Description: HTTP from internet (redirect to HTTPS)
+
+PrivateServiceSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: Security group for private services
+    VpcId: !Ref VPC
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3000
+        ToPort: 3000
+        SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
+        Description: HTTP from load balancer
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
+        Description: Application port from load balancer
+
+DatabaseSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: Security group for databases
+    VpcId: !Ref VPC
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 5432
+        ToPort: 5432
+        SourceSecurityGroupId: !Ref PrivateServiceSecurityGroup
+        Description: PostgreSQL from application services
+      - IpProtocol: tcp
+        FromPort: 6379
+        ToPort: 6379
+        SourceSecurityGroupId: !Ref PrivateServiceSecurityGroup
+        Description: Redis from application services</code></pre>
+                    </section>
+
+                    <section id="cost-optimization" class="content-section">
+                        <h2>Cost Optimization Strategy</h2>
+                        <div class="cost-optimization">
+                            <h3>Cost Management Approach</h3>
+                            <div class="cost-strategies">
+                                <div class="strategy-card">
+                                    <h4>Serverless-First Architecture</h4>
+                                    <ul>
+                                        <li>Lambda functions with pay-per-invocation pricing</li>
+                                        <li>Fargate containers with automatic scaling</li>
+                                        <li>DynamoDB on-demand pricing</li>
+                                        <li>Aurora Serverless v2 for variable workloads</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="strategy-card">
+                                    <h4>Intelligent Caching</h4>
+                                    <ul>
+                                        <li>CloudFront edge caching reduces origin requests</li>
+                                        <li>ElastiCache reduces database load</li>
+                                        <li>API Gateway caching for frequently accessed data</li>
+                                        <li>S3 Intelligent Tiering for storage optimization</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="strategy-card">
+                                    <h4>Resource Optimization</h4>
+                                    <ul>
+                                        <li>Right-sizing based on CloudWatch metrics</li>
+                                        <li>Spot instances for non-critical workloads</li>
+                                        <li>Reserved instances for predictable workloads</li>
+                                        <li>Automated resource cleanup</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Cost Monitoring</h3>
+                        <pre><code class="language-typescript">// Cost monitoring and optimization
+export class CostOptimization {
+  async implementCostControls(): Promise<void> {
+    // Set up billing alerts
+    await this.createBillingAlerts();
+    
+    // Implement resource tagging strategy
+    await this.enforceResourceTagging();
+    
+    // Set up automated cost reports
+    await this.setupCostReporting();
+    
+    // Configure resource scheduling
+    await this.setupResourceScheduling();
+  }
+
+  private async createBillingAlerts(): Promise<void> {
+    const budgets = [
+      {
+        budgetName: 'Monthly-Banking-Platform-Budget',
+        budgetLimit: 50000, // $50,000 per month
+        alertThresholds: [0.8, 0.9, 1.0]
+      },
+      {
+        budgetName: 'Development-Environment-Budget',
+        budgetLimit: 5000, // $5,000 per month
+        alertThresholds: [0.8, 1.0]
+      }
+    ];
+
+    for (const budget of budgets) {
+      await this.budgetsClient.send(new CreateBudgetCommand({
+        AccountId: process.env.AWS_ACCOUNT_ID,
+        Budget: {
+          BudgetName: budget.budgetName,
+          BudgetLimit: {
+            Amount: budget.budgetLimit.toString(),
+            Unit: 'USD'
+          },
+          TimeUnit: 'MONTHLY',
+          BudgetType: 'COST'
+        },
+        NotificationsWithSubscribers: budget.alertThresholds.map(threshold => ({
+          Notification: {
+            NotificationType: 'ACTUAL',
+            ComparisonOperator: 'GREATER_THAN',
+            Threshold: threshold * 100
+          },
+          Subscribers: [{
+            SubscriptionType: 'EMAIL',
+            Address: 'engineering-team@company.com'
+          }]
+        }))
+      }));
+    }
+  }
+}</code></pre>
+
+                        <div class="cost-projections">
+                            <h3>Estimated Monthly Costs (Production)</h3>
+                            <div class="cost-breakdown">
+                                <div class="cost-item">
+                                    <span class="service">CloudFront CDN</span>
+                                    <span class="cost">$2,500</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">ECS Fargate</span>
+                                    <span class="cost">$8,000</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">Lambda Functions</span>
+                                    <span class="cost">$3,500</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">RDS Aurora</span>
+                                    <span class="cost">$6,000</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">DynamoDB</span>
+                                    <span class="cost">$4,000</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">ElastiCache</span>
+                                    <span class="cost">$2,000</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">API Gateway</span>
+                                    <span class="cost">$1,500</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="service">Data Transfer</span>
+                                    <span class="cost">$3,000</span>
+                                </div>
+                                <div class="cost-total">
+                                    <span class="service"><strong>Total Estimated</strong></span>
+                                    <span class="cost"><strong>$30,500/month</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="deployment-automation" class="content-section">
+                        <h2>Multi-Region Deployment Automation</h2>
+                        
+                        <div class="deployment-overview">
+                            <h3>Key Deployment Principles</h3>
+                            <div class="principle-grid">
+                                <div class="principle-card">
+                                    <h4>🔄 Infrastructure as Code (IaC)</h4>
+                                    <p>All resources defined in CloudFormation templates, ensuring consistency across regions</p>
+                                </div>
+                                <div class="principle-card">
+                                    <h4>📦 Separate Regional Deployments</h4>
+                                    <p>Each region gets its own stack deployment - no automatic replication</p>
+                                </div>
+                                <div class="principle-card">
+                                    <h4>🎯 Region-Specific Parameters</h4>
+                                    <p>Same template, different parameters (AZs, CIDR blocks, compliance requirements)</p>
+                                </div>
+                                <div class="principle-card">
+                                    <h4>🔐 Cross-Region Resource References</h4>
+                                    <p>Use Systems Manager Parameter Store for sharing ARNs and endpoints across regions</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="deployment-pipeline">
+                            <h3>Automated Deployment Pipeline</h3>
+                            <div class="pipeline-flow">
+                                <div class="pipeline-stage">
+                                    <div class="stage-header">
+                                        <span class="stage-number">1</span>
+                                        <h4>Source & Build</h4>
+                                    </div>
+                                    <div class="stage-content">
+                                        <ul>
+                                            <li>Git push triggers CodePipeline</li>
+                                            <li>CodeBuild compiles and tests application</li>
+                                            <li>Docker images pushed to ECR in each region</li>
+                                        </ul>
+                                        <pre><code class="language-bash"># Multi-region ECR push
+for region in us-east-1 eu-west-1 ap-southeast-1; do
+  aws ecr get-login-password --region $region | \
+    docker login --username AWS --password-stdin \
+    $AWS_ACCOUNT_ID.dkr.ecr.$region.amazonaws.com
+  
+  docker tag banking-mfe:latest \
+    $AWS_ACCOUNT_ID.dkr.ecr.$region.amazonaws.com/banking-mfe:latest
+  
+  docker push \
+    $AWS_ACCOUNT_ID.dkr.ecr.$region.amazonaws.com/banking-mfe:latest
+done</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="pipeline-stage">
+                                    <div class="stage-header">
+                                        <span class="stage-number">2</span>
+                                        <h4>Sequential Regional Deployment</h4>
+                                    </div>
+                                    <div class="stage-content">
+                                        <div class="deployment-sequence">
+                                            <div class="deploy-step">
+                                                <strong>Primary Region (us-east-1)</strong>
+                                                <p>Deploy infrastructure and application first</p>
+                                            </div>
+                                            <div class="deploy-step">
+                                                <strong>Secondary Regions (eu-west-1, ap-southeast-1)</strong>
+                                                <p>Deploy in parallel after primary region validation</p>
+                                            </div>
+                                        </div>
+                                        <pre><code class="language-yaml"># CloudFormation parameters per region
+Parameters:
+  Region:
+    Type: String
+    AllowedValues: [us-east-1, eu-west-1, ap-southeast-1]
+  
+  VPCCidr:
+    Type: String
+    Default: !FindInMap [RegionMap, !Ref Region, VPCCidr]
+  
+  AvailabilityZones:
+    Type: CommaDelimitedList
+    Default: !FindInMap [RegionMap, !Ref Region, AZs]
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      VPCCidr: "10.0.0.0/16"
+      AZs: "us-east-1a,us-east-1b,us-east-1c"
+      ComplianceMode: "SOX"
+    eu-west-1:
+      VPCCidr: "10.1.0.0/16" 
+      AZs: "eu-west-1a,eu-west-1b,eu-west-1c"
+      ComplianceMode: "GDPR"
+    ap-southeast-1:
+      VPCCidr: "10.2.0.0/16"
+      AZs: "ap-southeast-1a,ap-southeast-1b,ap-southeast-1c"
+      ComplianceMode: "MAS"</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="pipeline-stage">
+                                    <div class="stage-header">
+                                        <span class="stage-number">3</span>
+                                        <h4>Route 53 Configuration</h4>
+                                    </div>
+                                    <div class="stage-content">
+                                        <p>Update DNS records to include new regional endpoints</p>
+                                        <pre><code class="language-python"># Automated Route 53 update script
+import boto3
+
+def update_route53_records(hosted_zone_id, regions_config):
+    route53 = boto3.client('route53')
+    
+    # Create record sets for each region
+    changes = []
+    for region_config in regions_config:
+        changes.append({
+            'Action': 'UPSERT',
+            'ResourceRecordSet': {
+                'Name': 'api.bankingmfe.com',
+                'Type': 'A',
+                'SetIdentifier': region_config['region'],
+                'GeolocationContinentCode': region_config['continent'],
+                'AliasTarget': {
+                    'DNSName': region_config['alb_dns'],
+                    'EvaluateTargetHealth': True,
+                    'HostedZoneId': region_config['alb_zone_id']
+                },
+                'HealthCheckId': region_config['health_check_id']
+            }
+        })
+    
+    # Apply all changes in a single batch
+    response = route53.change_resource_record_sets(
+        HostedZoneId=hosted_zone_id,
+        ChangeBatch={'Changes': changes}
+    )
+    
+    return response['ChangeInfo']['Id']</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="deployment-considerations">
+                            <h3>Banking-Specific Deployment Considerations</h3>
+                            <div class="considerations-grid">
+                                <div class="consideration-item">
+                                    <h4>🏦 Regulatory Compliance</h4>
+                                    <div class="compliance-details">
+                                        <div class="compliance-region">
+                                            <strong>US (SOX/PCI-DSS):</strong>
+                                            <ul>
+                                                <li>Audit logging enabled on all resources</li>
+                                                <li>Data encryption at rest and in transit</li>
+                                                <li>Network isolation with private subnets</li>
+                                            </ul>
+                                        </div>
+                                        <div class="compliance-region">
+                                            <strong>EU (GDPR):</strong>
+                                            <ul>
+                                                <li>Data residency enforcement</li>
+                                                <li>Right to deletion implementation</li>
+                                                <li>Consent management integration</li>
+                                            </ul>
+                                        </div>
+                                        <div class="compliance-region">
+                                            <strong>APAC (MAS/Local Regulations):</strong>
+                                            <ul>
+                                                <li>Local data processing requirements</li>
+                                                <li>Regulatory reporting capabilities</li>
+                                                <li>Operational risk management</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="consideration-item">
+                                    <h4>⚡ Performance Optimization</h4>
+                                    <div class="performance-features">
+                                        <div class="feature">
+                                            <strong>Edge Caching:</strong> CloudFront distributions in each region
+                                        </div>
+                                        <div class="feature">
+                                            <strong>Database Read Replicas:</strong> Region-specific Aurora read endpoints
+                                        </div>
+                                        <div class="feature">
+                                            <strong>CDN Integration:</strong> Regional S3 buckets for static assets
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="performance-monitoring" class="content-section">
+                        <h2>Performance Metrics & SLA Targets</h2>
+                        
+                        <div class="performance-targets">
+                            <h3>Banking-Grade Performance Requirements</h3>
+                            <div class="sla-matrix">
+                                <table class="performance-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Service Category</th>
+                                            <th>Response Time SLA</th>
+                                            <th>Throughput Target</th>
+                                            <th>Availability SLA</th>
+                                            <th>Monitoring Method</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Core Banking API</strong></td>
+                                            <td>&lt; 200ms (P95)</td>
+                                            <td>50,000 TPS</td>
+                                            <td>99.99%</td>
+                                            <td>X-Ray distributed tracing</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Account Dashboard MFE</strong></td>
+                                            <td>&lt; 1.5s (LCP)</td>
+                                            <td>100,000 concurrent users</td>
+                                            <td>99.95%</td>
+                                            <td>RUM + Synthetic monitoring</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Payment Processing</strong></td>
+                                            <td>&lt; 500ms (P99)</td>
+                                            <td>10,000 TPS</td>
+                                            <td>99.99%</td>
+                                            <td>Custom CloudWatch metrics</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Static Asset Delivery</strong></td>
+                                            <td>&lt; 100ms (P95)</td>
+                                            <td>1M requests/min</td>
+                                            <td>99.9%</td>
+                                            <td>CloudFront metrics</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="monitoring-implementation">
+                            <h3>Comprehensive Monitoring Stack</h3>
+                            <div class="monitoring-code">
+                                <h4>🔍 Application Performance Monitoring (APM)</h4>
+                                <pre><code class="language-typescript">// X-Ray SDK integration in MFE applications
+import AWSXRay from 'aws-xray-sdk-core';
+import AWS from 'aws-sdk';
+
+// Capture AWS SDK calls
+const awsSDK = AWSXRay.captureAWS(AWS);
+
+// Custom subsegment for business logic
+export const trackBankingOperation = (operationType: string) => {
+  const subsegment = AWSXRay.getSegment()?.addNewSubsegment(`banking_${operationType}`);
+  
+  return {
+    addMetadata: (key: string, value: any) => {
+      subsegment?.addMetadata('banking_metrics', key, value);
+    },
+    addAnnotation: (key: string, value: string | number) => {
+      subsegment?.addAnnotation(key, value.toString());
+    },
+    close: (error?: Error) => {
+      if (error) {
+        subsegment?.addError(error);
+      }
+      subsegment?.close();
+    }
+  };
+};</code></pre>
+                            </div>
+                            
+                            <div class="monitoring-code">
+                                <h4>📊 Real User Monitoring (RUM)</h4>
+                                <pre><code class="language-javascript">// CloudWatch RUM configuration for banking MFE
+import { AwsRum } from 'aws-rum-client';
+
+const config = {
+  sessionSampleRate: 1.0,
+  identityPoolId: 'us-east-1:12345678-1234-1234-1234-123456789012',
+  endpoint: 'https://dataplane.rum.us-east-1.amazonaws.com',
+  telemetries: ['performance', 'errors', 'http'],
+  allowCookies: true,
+  enableXRay: true
+};
+
+const awsRum = new AwsRum(
+  'banking-mfe-production',
+  '1.0.0',
+  'us-east-1',
+  config
+);
+
+// Custom banking metrics
+awsRum.recordCustomEvent('account_login', {
+  user_segment: 'premium',
+  login_method: 'biometric',
+  response_time: 1200
+});</code></pre>
+                            </div>
+                            
+                            <div class="monitoring-code">
+                                <h4>🚨 Advanced Alerting Strategy</h4>
+                                <pre><code class="language-yaml">CloudWatchAlarms:
+  # Critical: Core Banking API Response Time
+  CoreAPILatencyAlarm:
+    MetricName: ResponseTime
+    Namespace: AWS/ApplicationELB
+    Statistic: Average
+    Period: 60
+    EvaluationPeriods: 2
+    Threshold: 200  # milliseconds
+    ComparisonOperator: GreaterThanThreshold
+    AlarmActions:
+      - !Ref PagerDutyCriticalTopic
+      - !Ref AutoScalingAction
+      
+  # Business Metric: Transaction Success Rate
+  TransactionSuccessRateAlarm:
+    MetricName: TransactionSuccessRate
+    Namespace: Banking/CustomMetrics
+    Statistic: Average
+    Period: 300
+    EvaluationPeriods: 3
+    Threshold: 99.5  # percentage
+    ComparisonOperator: LessThanThreshold</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="incident-response">
+                            <h3>Automated Incident Response</h3>
+                            <div class="response-automation">
+                                <div class="incident-timeline">
+                                    <div class="timeline-item">
+                                        <span class="time">0-5 min</span>
+                                        <div class="action">
+                                            <strong>Detection & Alerting</strong>
+                                            <p>Automated PagerDuty escalation, war room bridge created, status page updated</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <span class="time">5-15 min</span>
+                                        <div class="action">
+                                            <strong>Assessment & Triage</strong>
+                                            <p>CloudWatch dashboard analysis, X-Ray trace investigation, impact assessment</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <span class="time">15-30 min</span>
+                                        <div class="action">
+                                            <strong>Automated Recovery</strong>
+                                            <p>Failover to secondary region, circuit breaker activation, traffic throttling</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="recovery-code">
+                                    <pre><code class="language-python"># Lambda function for automated recovery
+import boto3
+import json
+
+def lambda_handler(event, context):
+    """Automated incident response for banking MFE platform"""
+    
+    alarm_data = json.loads(event['Records'][0]['Sns']['Message'])
+    alarm_name = alarm_data['AlarmName']
+    
+    if alarm_name == 'CoreAPILatencyAlarm':
+        # Scale up ECS services
+        ecs_client = boto3.client('ecs')
+        response = ecs_client.update_service(
+            cluster='banking-mfe-cluster',
+            service='core-banking-api',
+            desiredCount=20  # Scale up from current count
+        )
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'action': 'scale_up',
+                'new_desired_count': 20
+            })
+        }</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="next-steps">
+                        <h2>Next: Explore Implementation Details</h2>
+                        <div class="next-buttons">
+                            <a href="micro-frontends.html" class="btn btn-primary">Micro Frontend Strategy →</a>
+                            <a href="performance.html" class="btn btn-secondary">Performance & Scale →</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Banking UI Architecture - Technical Presentation</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,2322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance & Scalability - Banking Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html">Banking Architecture</a></h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="micro-frontends.html" class="nav-link">Micro Frontends</a>
+                </li>
+                <li class="nav-item">
+                    <a href="aws-architecture.html" class="nav-link">AWS Infrastructure</a>
+                </li>
+                <li class="nav-item">
+                    <a href="performance.html" class="nav-link active">Performance</a>
+                </li>
+                <li class="nav-item">
+                    <a href="resilience.html" class="nav-link">Resilience & Security</a>
+                </li>
+                <li class="nav-item">
+                    <a href="ai-integration.html" class="nav-link">AI Integration</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Performance & Scalability Architecture</h1>
+                <p>Enterprise-grade performance optimization and data communication patterns for banking-scale applications</p>
+            </div>
+
+            <div class="content-grid">
+                <aside class="sidebar">
+                    <nav class="page-nav">
+                        <h3>Contents</h3>
+                        <ul>
+                            <li><a href="#data-communication">Data Communication</a></li>
+                            <li><a href="#caching-strategies">Caching Strategies</a></li>
+                            <li><a href="#event-driven">Event-Driven Architecture</a></li>
+                            <li><a href="#state-management">State Management</a></li>
+                            <li><a href="#performance-monitoring">Performance Monitoring</a></li>
+                            <li><a href="#scalability-patterns">Scalability Patterns</a></li>
+                            <li><a href="#fault-tolerance">Fault Tolerance</a></li>
+                            <li><a href="#load-optimization">Load Optimization</a></li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <article class="main-content">
+                    <section id="data-communication" class="content-section">
+                        <h2>🔄 Data Communication & Sharing Mechanisms</h2>
+                        
+                        <div class="communication-overview">
+                            <h3>Multi-Layer Communication Architecture</h3>
+                            <p>Banking applications require sophisticated data communication patterns that handle real-time updates, ensure data consistency, and maintain audit trails across all MFEs and services.</p>
+                            
+                            <div class="communication-layers">
+                                <div class="layer-card">
+                                    <h4>🌐 Frontend Communication</h4>
+                                    <p>MFE-to-MFE and MFE-to-Shell communication patterns</p>
+                                </div>
+                                <div class="layer-card">
+                                    <h4>⚡ Real-time Messaging</h4>
+                                    <p>WebSocket and Server-Sent Events for live updates</p>
+                                </div>
+                                <div class="layer-card">
+                                    <h4>🔄 API Communication</h4>
+                                    <p>RESTful APIs, GraphQL, and gRPC for service communication</p>
+                                </div>
+                                <div class="layer-card">
+                                    <h4>📨 Event Streaming</h4>
+                                    <p>Kafka and EventBridge for asynchronous processing</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="communication-patterns">
+                            <h3>🎯 MFE Communication Patterns</h3>
+                            
+                            <div class="pattern-implementation">
+                                <h4>Event Bus Pattern (Recommended)</h4>
+                                <div class="pattern-details">
+                                    <p>Centralized event bus for decoupled communication between MFEs with comprehensive audit logging.</p>
+                                    
+                                    <pre><code class="language-typescript">// Banking Event Bus with Audit Trail
+class BankingEventBus {
+  private eventHandlers = new Map<string, Set<EventHandler>>();
+  private eventHistory: EventRecord[] = [];
+  private auditLogger: AuditLogger;
+  private rateLimiter: RateLimiter;
+  
+  constructor() {
+    this.auditLogger = new AuditLogger();
+    this.rateLimiter = new RateLimiter({
+      maxEventsPerSecond: 1000,
+      maxEventsPerMFE: 100
+    });
+  }
+  
+  // Subscribe to events with permission validation
+  subscribe<T>(
+    eventType: string, 
+    handler: EventHandler<T>, 
+    options: SubscriptionOptions = {}
+  ): Subscription {
+    
+    // Validate MFE permissions to subscribe to this event type
+    if (!this.validateSubscriptionPermissions(eventType, options.mfeId)) {
+      throw new UnauthorizedError(`MFE ${options.mfeId} not authorized for event ${eventType}`);
+    }
+    
+    if (!this.eventHandlers.has(eventType)) {
+      this.eventHandlers.set(eventType, new Set());
+    }
+    
+    const wrappedHandler: EventHandler<T> = async (event) => {
+      try {
+        // Log event consumption
+        await this.auditLogger.logEventConsumption({
+          eventType,
+          consumerId: options.mfeId,
+          eventId: event.id,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Execute handler with timeout
+        await Promise.race([
+          handler(event),
+          this.createTimeout(options.timeoutMs || 5000)
+        ]);
+        
+      } catch (error) {
+        console.error(`Event handler failed for ${eventType}:`, error);
+        
+        // Log handler failure
+        await this.auditLogger.logEventError({
+          eventType,
+          consumerId: options.mfeId,
+          error: error.message,
+          eventId: event.id
+        });
+      }
+    };
+    
+    this.eventHandlers.get(eventType)!.add(wrappedHandler);
+    
+    return {
+      unsubscribe: () => {
+        this.eventHandlers.get(eventType)?.delete(wrappedHandler);
+      }
+    };
+  }
+  
+  // Publish events with validation and rate limiting
+  async publish<T>(event: BankingEvent<T>): Promise<void> {
+    // Rate limiting check
+    if (!await this.rateLimiter.checkLimit(event.source)) {
+      throw new RateLimitError(`Rate limit exceeded for ${event.source}`);
+    }
+    
+    // Validate event schema
+    if (!this.validateEventSchema(event)) {
+      throw new ValidationError('Invalid event schema');
+    }
+    
+    // Enrich event with metadata
+    const enrichedEvent = {
+      ...event,
+      id: event.id || uuidv4(),
+      timestamp: new Date().toISOString(),
+      correlationId: event.correlationId || this.generateCorrelationId(),
+      version: '1.0'
+    };
+    
+    // Store in event history for replay/debugging
+    this.eventHistory.push({
+      event: enrichedEvent,
+      publishedAt: new Date().toISOString(),
+      handlerCount: this.eventHandlers.get(event.type)?.size || 0
+    });
+    
+    // Log event publication
+    await this.auditLogger.logEventPublication({
+      eventType: event.type,
+      publisherId: event.source,
+      eventId: enrichedEvent.id,
+      correlationId: enrichedEvent.correlationId
+    });
+    
+    // Deliver to subscribers
+    const handlers = this.eventHandlers.get(event.type);
+    if (handlers && handlers.size > 0) {
+      const deliveryPromises = Array.from(handlers).map(handler => 
+        handler(enrichedEvent).catch(error => {
+          console.error(`Handler failed for event ${event.type}:`, error);
+        })
+      );
+      
+      await Promise.allSettled(deliveryPromises);
+    }
+  }
+  
+  // Banking-specific event types
+  async publishAccountUpdate(accountId: string, changes: AccountChanges): Promise<void> {
+    await this.publish({
+      type: 'banking.account.updated',
+      source: 'account-service',
+      data: {
+        accountId,
+        changes,
+        timestamp: new Date().toISOString()
+      },
+      metadata: {
+        sensitive: true,
+        requiresAudit: true,
+        complianceLevel: 'high'
+      }
+    });
+  }
+  
+  async publishTransactionEvent(transaction: Transaction): Promise<void> {
+    await this.publish({
+      type: 'banking.transaction.completed',
+      source: 'payment-service',
+      data: transaction,
+      metadata: {
+        sensitive: true,
+        requiresAudit: true,
+        antiMoneyLaundering: true
+      }
+    });
+  }
+  
+  async publishUserAction(action: UserAction): Promise<void> {
+    await this.publish({
+      type: 'banking.user.action',
+      source: action.mfeSource,
+      data: action,
+      metadata: {
+        behaviorTracking: true,
+        sessionId: action.sessionId
+      }
+    });
+  }
+}</code></pre>
+                                    
+                                    <h4>Real-time Data Synchronization</h4>
+                                    <pre><code class="language-typescript">// WebSocket Manager for Real-time Banking Data
+class BankingWebSocketManager {
+  private connections = new Map<string, WebSocket>();
+  private subscriptions = new Map<string, Set<string>>();
+  private heartbeatInterval: NodeJS.Timeout;
+  private reconnectAttempts = new Map<string, number>();
+  
+  constructor() {
+    this.startHeartbeat();
+  }
+  
+  async connect(userId: string, sessionToken: string): Promise<void> {
+    const wsUrl = `wss://realtime.banking.company.com/ws?token=${sessionToken}`;
+    
+    try {
+      const ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        console.log(`WebSocket connected for user ${userId}`);
+        this.connections.set(userId, ws);
+        this.reconnectAttempts.set(userId, 0);
+        
+        // Send authentication
+        ws.send(JSON.stringify({
+          type: 'auth',
+          token: sessionToken,
+          userId
+        }));
+      };
+      
+      ws.onmessage = (event) => {
+        this.handleMessage(userId, JSON.parse(event.data));
+      };
+      
+      ws.onclose = () => {
+        this.handleDisconnection(userId);
+      };
+      
+      ws.onerror = (error) => {
+        console.error(`WebSocket error for user ${userId}:`, error);
+        this.handleConnectionError(userId);
+      };
+      
+    } catch (error) {
+      console.error(`Failed to connect WebSocket for user ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Subscribe to real-time data streams
+  subscribeToAccountUpdates(userId: string, accountIds: string[]): void {
+    const ws = this.connections.get(userId);
+    if (!ws) throw new Error('WebSocket not connected');
+    
+    ws.send(JSON.stringify({
+      type: 'subscribe',
+      channel: 'account_updates',
+      accountIds
+    }));
+    
+    // Track subscription
+    if (!this.subscriptions.has(userId)) {
+      this.subscriptions.set(userId, new Set());
+    }
+    this.subscriptions.get(userId)!.add('account_updates');
+  }
+  
+  subscribeToTransactionAlerts(userId: string): void {
+    const ws = this.connections.get(userId);
+    if (!ws) throw new Error('WebSocket not connected');
+    
+    ws.send(JSON.stringify({
+      type: 'subscribe',
+      channel: 'transaction_alerts'
+    }));
+    
+    this.subscriptions.get(userId)?.add('transaction_alerts');
+  }
+  
+  subscribeToMarketData(userId: string, symbols: string[]): void {
+    const ws = this.connections.get(userId);
+    if (!ws) throw new Error('WebSocket not connected');
+    
+    ws.send(JSON.stringify({
+      type: 'subscribe',
+      channel: 'market_data',
+      symbols
+    }));
+    
+    this.subscriptions.get(userId)?.add('market_data');
+  }
+  
+  private handleMessage(userId: string, message: any): void {
+    switch (message.type) {
+      case 'account_update':
+        this.handleAccountUpdate(userId, message.data);
+        break;
+        
+      case 'transaction_alert':
+        this.handleTransactionAlert(userId, message.data);
+        break;
+        
+      case 'market_data':
+        this.handleMarketData(userId, message.data);
+        break;
+        
+      case 'system_notification':
+        this.handleSystemNotification(userId, message.data);
+        break;
+        
+      default:
+        console.warn(`Unknown message type: ${message.type}`);
+    }
+  }
+  
+  private handleAccountUpdate(userId: string, data: any): void {
+    // Publish to event bus for MFE consumption
+    eventBus.publish({
+      type: 'banking.realtime.account_update',
+      source: 'websocket-manager',
+      data: {
+        userId,
+        accountUpdate: data
+      }
+    });
+  }
+  
+  private async handleDisconnection(userId: string): Promise<void> {
+    console.log(`WebSocket disconnected for user ${userId}`);
+    this.connections.delete(userId);
+    
+    // Attempt reconnection with exponential backoff
+    const attempts = this.reconnectAttempts.get(userId) || 0;
+    if (attempts < 5) {
+      const delay = Math.pow(2, attempts) * 1000; // Exponential backoff
+      
+      setTimeout(() => {
+        this.reconnectUser(userId);
+      }, delay);
+      
+      this.reconnectAttempts.set(userId, attempts + 1);
+    }
+  }
+}</code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="alternative-patterns">
+                                <h4>Alternative Communication Patterns</h4>
+                                
+                                <div class="pattern-grid">
+                                    <div class="pattern-card">
+                                        <h5>🔗 Direct API Calls</h5>
+                                        <p><strong>Use Case:</strong> Simple request-response operations</p>
+                                        <p><strong>Pros:</strong> Simple, direct, well-understood</p>
+                                        <p><strong>Cons:</strong> Tight coupling, no event history</p>
+                                        
+                                        <pre><code class="language-typescript">// Banking API Client with Circuit Breaker
+class BankingAPIClient {
+  private circuitBreaker: CircuitBreaker;
+  private cache: LRUCache;
+  
+  async getAccountBalance(accountId: string): Promise<AccountBalance> {
+    return this.circuitBreaker.execute(async () => {
+      // Check cache first
+      const cached = this.cache.get(`balance:${accountId}`);
+      if (cached && !this.isStaleData(cached)) {
+        return cached.data;
+      }
+      
+      const response = await fetch(`/api/accounts/${accountId}/balance`, {
+        headers: this.getAuthHeaders()
+      });
+      
+      if (!response.ok) {
+        throw new APIError(`Failed to fetch balance: ${response.status}`);
+      }
+      
+      const balance = await response.json();
+      
+      // Cache with TTL
+      this.cache.set(`balance:${accountId}`, {
+        data: balance,
+        timestamp: Date.now()
+      });
+      
+      return balance;
+    });
+  }
+}</code></pre>
+                                    </div>
+                                    
+                                    <div class="pattern-card">
+                                        <h5>📡 Message Queues</h5>
+                                        <p><strong>Use Case:</strong> Asynchronous processing, reliable delivery</p>
+                                        <p><strong>Pros:</strong> Reliable, scalable, decoupled</p>
+                                        <p><strong>Cons:</strong> Complexity, eventual consistency</p>
+                                        
+                                        <pre><code class="language-typescript">// SQS Message Handler for Banking Events
+class BankingMessageHandler {
+  private sqsClient: SQSClient;
+  
+  async processTransactionMessage(message: SQSMessage): Promise<void> {
+    try {
+      const transaction = JSON.parse(message.Body);
+      
+      // Process transaction
+      await this.processTransaction(transaction);
+      
+      // Update account balances
+      await this.updateAccountBalances(transaction);
+      
+      // Send notifications
+      await this.sendTransactionNotifications(transaction);
+      
+      // Delete message from queue
+      await this.sqsClient.deleteMessage({
+        QueueUrl: process.env.TRANSACTION_QUEUE_URL,
+        ReceiptHandle: message.ReceiptHandle
+      });
+      
+    } catch (error) {
+      // Send to DLQ for manual review
+      await this.sendToDeadLetterQueue(message, error);
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="caching-strategies" class="content-section">
+                        <h2>⚡ Multi-Layer Caching Strategies</h2>
+                        
+                        <div class="caching-architecture">
+                            <h3>Banking-Grade Caching Hierarchy</h3>
+                            <p>A sophisticated caching strategy that balances performance with data freshness requirements for financial data.</p>
+                            
+                            <div class="cache-layers">
+                                <div class="cache-layer">
+                                    <h4>🖥️ Browser Cache (L1)</h4>
+                                    <div class="layer-details">
+                                        <p><strong>Purpose:</strong> Static assets, user preferences</p>
+                                        <p><strong>TTL:</strong> 1-7 days for assets, 5-15 minutes for data</p>
+                                        <p><strong>Invalidation:</strong> Version-based, manual clear</p>
+                                        
+                                        <pre><code class="language-typescript">// Browser Cache Manager with Banking-Specific Rules
+class BrowserCacheManager {
+  private readonly CACHE_RULES = {
+    // Static assets - long-term caching
+    'static_assets': {
+      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
+      versioned: true,
+      immutable: true
+    },
+    
+    // Account balances - short-term caching
+    'account_balance': {
+      ttl: 5 * 60 * 1000, // 5 minutes
+      sensitive: true,
+      requiresEncryption: true
+    },
+    
+    // User preferences - medium-term caching
+    'user_preferences': {
+      ttl: 60 * 60 * 1000, // 1 hour
+      persistent: true
+    },
+    
+    // Market data - very short-term caching
+    'market_data': {
+      ttl: 30 * 1000, // 30 seconds
+      realtime: true
+    }
+  };
+  
+  async get<T>(key: string, type: string): Promise<T | null> {
+    const rule = this.CACHE_RULES[type];
+    if (!rule) return null;
+    
+    const cached = localStorage.getItem(this.generateCacheKey(key, type));
+    if (!cached) return null;
+    
+    try {
+      const parsed = JSON.parse(cached);
+      
+      // Check TTL
+      if (Date.now() - parsed.timestamp > rule.ttl) {
+        this.delete(key, type);
+        return null;
+      }
+      
+      // Decrypt sensitive data
+      if (rule.requiresEncryption) {
+        parsed.data = await this.decrypt(parsed.data);
+      }
+      
+      return parsed.data;
+    } catch (error) {
+      console.error('Cache retrieval error:', error);
+      this.delete(key, type);
+      return null;
+    }
+  }
+  
+  async set<T>(key: string, type: string, data: T): Promise<void> {
+    const rule = this.CACHE_RULES[type];
+    if (!rule) return;
+    
+    try {
+      let processedData = data;
+      
+      // Encrypt sensitive data
+      if (rule.requiresEncryption) {
+        processedData = await this.encrypt(data);
+      }
+      
+      const cacheEntry = {
+        data: processedData,
+        timestamp: Date.now(),
+        version: rule.versioned ? this.getCurrentVersion() : undefined
+      };
+      
+      const storage = rule.persistent ? localStorage : sessionStorage;
+      storage.setItem(
+        this.generateCacheKey(key, type), 
+        JSON.stringify(cacheEntry)
+      );
+      
+    } catch (error) {
+      console.error('Cache storage error:', error);
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="cache-layer">
+                                    <h4>🌐 CDN Cache (L2)</h4>
+                                    <div class="layer-details">
+                                        <p><strong>Purpose:</strong> Static assets, MFE bundles, public data</p>
+                                        <p><strong>TTL:</strong> Hours to days based on content type</p>
+                                        <p><strong>Invalidation:</strong> Path-based, tag-based purging</p>
+                                        
+                                        <pre><code class="language-typescript">// CloudFront Cache Configuration
+const cloudFrontConfig = {
+  distributions: [
+    {
+      id: 'banking-static-assets',
+      origins: ['assets.banking.company.com'],
+      behaviors: [
+        {
+          pathPattern: '/static/js/*',
+          ttl: {
+            default: 86400, // 1 day
+            max: 31536000   // 1 year
+          },
+          headers: ['CloudFront-Viewer-Country'],
+          compress: true
+        },
+        {
+          pathPattern: '/api/public/*',
+          ttl: {
+            default: 300,  // 5 minutes
+            max: 3600      // 1 hour
+          },
+          headers: ['Authorization', 'X-Banking-Session-ID'],
+          forwardQueryStrings: true
+        }
+      ]
+    }
+  ],
+  
+  // Cache invalidation strategies
+  invalidationRules: {
+    'deployment': {
+      paths: ['/static/js/*', '/static/css/*'],
+      trigger: 'mfe_deployment'
+    },
+    'data_update': {
+      paths: ['/api/public/*'],
+      trigger: 'manual'
+    }
+  }
+};</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="cache-layer">
+                                    <h4>🚀 Application Cache (L3)</h4>
+                                    <div class="layer-details">
+                                        <p><strong>Purpose:</strong> API responses, computed data, session state</p>
+                                        <p><strong>TTL:</strong> Seconds to minutes based on data sensitivity</p>
+                                        <p><strong>Invalidation:</strong> Event-driven, TTL-based</p>
+                                        
+                                        <pre><code class="language-typescript">// Redis-based Application Cache
+class BankingApplicationCache {
+  private redisClient: Redis;
+  private localCache: LRUCache;
+  
+  constructor() {
+    this.redisClient = new Redis({
+      host: process.env.REDIS_HOST,
+      port: 6379,
+      keyPrefix: 'banking:',
+      retryDelayOnFailover: 100,
+      enableReadyCheck: false,
+      maxRetriesPerRequest: 3
+    });
+    
+    this.localCache = new LRUCache({
+      max: 1000,
+      ttl: 60000 // 1 minute local cache
+    });
+  }
+  
+  async getAccountData(accountId: string): Promise<AccountData | null> {
+    // Try local cache first (L3a)
+    const localKey = `account:${accountId}`;
+    let cached = this.localCache.get(localKey);
+    if (cached) return cached;
+    
+    // Try Redis cache (L3b)
+    const redisKey = `account:${accountId}`;
+    const redisCached = await this.redisClient.get(redisKey);
+    
+    if (redisCached) {
+      const data = JSON.parse(redisCached);
+      
+      // Store in local cache for faster subsequent access
+      this.localCache.set(localKey, data);
+      return data;
+    }
+    
+    return null;
+  }
+  
+  async setAccountData(accountId: string, data: AccountData): Promise<void> {
+    const key = `account:${accountId}`;
+    
+    // Store in Redis with TTL
+    await this.redisClient.setex(
+      key, 
+      300, // 5 minutes TTL
+      JSON.stringify(data)
+    );
+    
+    // Store in local cache
+    this.localCache.set(key, data);
+    
+    // Publish invalidation event
+    await this.redisClient.publish('cache:invalidate', JSON.stringify({
+      pattern: `account:${accountId}`,
+      reason: 'data_update',
+      timestamp: Date.now()
+    }));
+  }
+  
+  // Cache warming for frequently accessed data
+  async warmCache(): Promise<void> {
+    const frequentlyAccessedAccounts = await this.getFrequentlyAccessedAccounts();
+    
+    const warmingPromises = frequentlyAccessedAccounts.map(async (accountId) => {
+      try {
+        const data = await this.fetchAccountDataFromDB(accountId);
+        await this.setAccountData(accountId, data);
+      } catch (error) {
+        console.error(`Failed to warm cache for account ${accountId}:`, error);
+      }
+    });
+    
+    await Promise.allSettled(warmingPromises);
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="cache-layer">
+                                    <h4>💾 Database Cache (L4)</h4>
+                                    <div class="layer-details">
+                                        <p><strong>Purpose:</strong> Query results, computed aggregations</p>
+                                        <p><strong>TTL:</strong> Query-dependent, usually minutes to hours</p>
+                                        <p><strong>Invalidation:</strong> Write-through, lazy loading</p>
+                                        
+                                        <pre><code class="language-typescript">// Database Query Cache with ElastiCache
+class DatabaseQueryCache {
+  private elastiCacheClient: ElastiCacheClient;
+  private queryAnalyzer: QueryAnalyzer;
+  
+  async executeQuery<T>(query: SQLQuery): Promise<T[]> {
+    // Analyze query for cacheability
+    const analysis = this.queryAnalyzer.analyze(query);
+    
+    if (!analysis.cacheable) {
+      return await this.executeDirectQuery(query);
+    }
+    
+    const cacheKey = this.generateQueryCacheKey(query);
+    
+    // Try cache first
+    const cached = await this.elastiCacheClient.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+    
+    // Execute query
+    const results = await this.executeDirectQuery(query);
+    
+    // Cache results with appropriate TTL
+    const ttl = this.calculateTTL(analysis);
+    await this.elastiCacheClient.setex(
+      cacheKey,
+      ttl,
+      JSON.stringify(results)
+    );
+    
+    return results;
+  }
+  
+  private calculateTTL(analysis: QueryAnalysis): number {
+    // Banking-specific TTL rules
+    if (analysis.tables.includes('transactions')) {
+      return 60; // 1 minute for transaction data
+    }
+    
+    if (analysis.tables.includes('account_balances')) {
+      return 300; // 5 minutes for balance data
+    }
+    
+    if (analysis.tables.includes('user_preferences')) {
+      return 3600; // 1 hour for preferences
+    }
+    
+    if (analysis.containsAggregations) {
+      return 1800; // 30 minutes for complex queries
+    }
+    
+    return 600; // 10 minutes default
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="event-driven" class="content-section">
+                        <h2>🎯 Event-Driven Architecture</h2>
+                        
+                        <div class="event-architecture">
+                            <h3>Banking Event Streaming Platform</h3>
+                            <p>A comprehensive event-driven architecture that handles millions of banking events per day with guaranteed delivery and audit capabilities.</p>
+                            
+                            <div class="event-components">
+                                <div class="component-card">
+                                    <h4>📨 Event Producers</h4>
+                                    <p>MFEs, APIs, and services that generate business events</p>
+                                </div>
+                                <div class="component-card">
+                                    <h4>🌊 Event Streams</h4>
+                                    <p>Kafka topics organized by business domain and criticality</p>
+                                </div>
+                                <div class="component-card">
+                                    <h4>🎯 Event Consumers</h4>
+                                    <p>Services that process events for business logic and analytics</p>
+                                </div>
+                                <div class="component-card">
+                                    <h4>📊 Event Store</h4>
+                                    <p>Persistent storage for event replay and audit compliance</p>
+                                </div>
+                            </div>
+                            
+                            <h4>Banking Event Schema Design</h4>
+                            <pre><code class="language-typescript">// Banking Event Schema with Compliance Metadata
+interface BankingEvent {
+  // Standard event envelope
+  id: string;
+  type: string;
+  source: string;
+  timestamp: string;
+  version: string;
+  correlationId: string;
+  
+  // Banking-specific metadata
+  metadata: {
+    // Compliance and regulatory
+    regulatoryClassification: 'public' | 'internal' | 'confidential' | 'restricted';
+    dataResidency: string; // US, EU, etc.
+    retentionPeriod: number; // days
+    encryptionRequired: boolean;
+    
+    // Audit and tracing
+    auditLevel: 'none' | 'basic' | 'detailed' | 'comprehensive';
+    businessProcess: string;
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    
+    // Performance and processing
+    priority: 'low' | 'normal' | 'high' | 'urgent';
+    batchable: boolean;
+    idempotencyKey?: string;
+  };
+  
+  // Event payload
+  data: unknown;
+}
+
+// Specific Banking Event Types
+interface AccountBalanceChangedEvent extends BankingEvent {
+  type: 'banking.account.balance_changed';
+  data: {
+    accountId: string;
+    previousBalance: number;
+    newBalance: number;
+    changeAmount: number;
+    changeReason: string;
+    transactionId?: string;
+    effectiveDate: string;
+  };
+}
+
+interface TransactionProcessedEvent extends BankingEvent {
+  type: 'banking.transaction.processed';
+  data: {
+    transactionId: string;
+    accountId: string;
+    type: 'debit' | 'credit' | 'transfer';
+    amount: number;
+    currency: string;
+    status: 'pending' | 'completed' | 'failed' | 'cancelled';
+    merchant?: {
+      name: string;
+      category: string;
+      location: string;
+    };
+    riskScore: number;
+    antiMoneyLaunderingFlags: string[];
+  };
+}
+
+interface FraudAlertEvent extends BankingEvent {
+  type: 'banking.fraud.alert';
+  data: {
+    alertId: string;
+    accountId: string;
+    transactionId?: string;
+    alertType: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    riskScore: number;
+    patterns: string[];
+    recommendedAction: string;
+    autoBlocked: boolean;
+  };
+}</code></pre>
+                            
+                            <h4>Event Processing Pipeline</h4>
+                            <pre><code class="language-typescript">// Kafka-based Event Processing for Banking
+class BankingEventProcessor {
+  private kafkaProducer: KafkaProducer;
+  private kafkaConsumer: KafkaConsumer;
+  private eventStore: EventStore;
+  private complianceValidator: ComplianceValidator;
+  
+  constructor() {
+    this.kafkaProducer = new KafkaProducer({
+      brokers: process.env.KAFKA_BROKERS.split(','),
+      clientId: 'banking-event-processor',
+      acks: 'all', // Wait for all replicas
+      retries: 3,
+      idempotent: true
+    });
+    
+    this.eventStore = new EventStore();
+    this.complianceValidator = new ComplianceValidator();
+  }
+  
+  async publishEvent(event: BankingEvent): Promise<void> {
+    try {
+      // Validate compliance requirements
+      await this.complianceValidator.validate(event);
+      
+      // Enrich event with audit metadata
+      const enrichedEvent = await this.enrichEvent(event);
+      
+      // Determine target topic based on event type and priority
+      const topic = this.getTopicForEvent(enrichedEvent);
+      
+      // Partition key for ordered processing (e.g., by accountId)
+      const partitionKey = this.getPartitionKey(enrichedEvent);
+      
+      // Publish to Kafka
+      await this.kafkaProducer.send({
+        topic,
+        key: partitionKey,
+        value: JSON.stringify(enrichedEvent),
+        headers: {
+          'event-type': enrichedEvent.type,
+          'correlation-id': enrichedEvent.correlationId,
+          'source': enrichedEvent.source,
+          'timestamp': enrichedEvent.timestamp
+        }
+      });
+      
+      // Store in event store for replay/audit
+      await this.eventStore.store(enrichedEvent);
+      
+    } catch (error) {
+      console.error('Failed to publish event:', error);
+      
+      // Store failed event for manual review
+      await this.storeFailed Event(event, error);
+      throw error;
+    }
+  }
+  
+  // Event consumer with error handling and retry logic
+  async startEventConsumer(topics: string[], groupId: string): Promise<void> {
+    this.kafkaConsumer = new KafkaConsumer({
+      brokers: process.env.KAFKA_BROKERS.split(','),
+      groupId,
+      sessionTimeout: 30000,
+      heartbeatInterval: 3000,
+      maxInFlightRequests: 1, // Ensure ordering
+      retry: {
+        initialRetryTime: 100,
+        retries: 8
+      }
+    });
+    
+    await this.kafkaConsumer.subscribe({ topics });
+    
+    await this.kafkaConsumer.run({
+      eachMessage: async ({ topic, partition, message, heartbeat }) => {
+        try {
+          // Heartbeat to keep session alive
+          await heartbeat();
+          
+          // Parse event
+          const event: BankingEvent = JSON.parse(message.value.toString());
+          
+          // Process event based on type
+          await this.processEvent(event, { topic, partition });
+          
+          // Update processing metrics
+          this.updateMetrics(event.type, 'success');
+          
+        } catch (error) {
+          console.error('Event processing failed:', error);
+          
+          // Handle processing failure
+          await this.handleProcessingFailure(message, error);
+          
+          this.updateMetrics(message.headers['event-type'], 'error');
+        }
+      }
+    });
+  }
+  
+  private async processEvent(event: BankingEvent, context: ProcessingContext): Promise<void> {
+    switch (event.type) {
+      case 'banking.transaction.processed':
+        await this.handleTransactionProcessed(event as TransactionProcessedEvent);
+        break;
+        
+      case 'banking.account.balance_changed':
+        await this.handleBalanceChanged(event as AccountBalanceChangedEvent);
+        break;
+        
+      case 'banking.fraud.alert':
+        await this.handleFraudAlert(event as FraudAlertEvent);
+        break;
+        
+      default:
+        console.warn(`Unknown event type: ${event.type}`);
+    }
+  }
+  
+  private async handleTransactionProcessed(event: TransactionProcessedEvent): Promise<void> {
+    const { data } = event;
+    
+    // Update account balance
+    await this.updateAccountBalance(data.accountId, data.amount, data.type);
+    
+    // Check for fraud patterns
+    if (data.riskScore > 0.8) {
+      await this.triggerFraudReview(data.transactionId, data.accountId);
+    }
+    
+    // Update user notifications
+    await this.sendTransactionNotification(data.accountId, data);
+    
+    // Update analytics
+    await this.updateTransactionAnalytics(data);
+  }
+  
+  private getTopicForEvent(event: BankingEvent): string {
+    const { type, metadata } = event;
+    
+    // High-priority events go to dedicated topics
+    if (metadata.priority === 'urgent' || metadata.riskLevel === 'critical') {
+      return 'banking-events-urgent';
+    }
+    
+    // Route by business domain
+    if (type.startsWith('banking.transaction')) {
+      return 'banking-transactions';
+    }
+    
+    if (type.startsWith('banking.account')) {
+      return 'banking-accounts';
+    }
+    
+    if (type.startsWith('banking.fraud')) {
+      return 'banking-fraud-alerts';
+    }
+    
+    return 'banking-events-general';
+  }
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <section id="state-management" class="content-section">
+                        <h2>🔄 Distributed State Management</h2>
+                        
+                        <div class="state-architecture">
+                            <h3>Multi-MFE State Synchronization</h3>
+                            <p>Sophisticated state management that maintains consistency across MFEs while respecting data ownership and privacy boundaries.</p>
+                            
+                            <div class="state-patterns">
+                                <div class="pattern-card">
+                                    <h4>🏦 Account State Management</h4>
+                                    <div class="pattern-details">
+                                        <p>Centralized account state with optimistic updates and conflict resolution</p>
+                                        
+                                        <pre><code class="language-typescript">// Distributed Account State Manager
+class AccountStateManager {
+  private stateStore: DistributedStateStore;
+  private eventBus: EventBus;
+  private conflictResolver: ConflictResolver;
+  private optimisticUpdates = new Map<string, OptimisticUpdate>();
+  
+  constructor() {
+    this.stateStore = new DistributedStateStore({
+      backend: 'redis-cluster',
+      consistency: 'strong',
+      partitioning: 'by-account-id'
+    });
+    
+    this.setupEventHandlers();
+  }
+  
+  // Get account state with caching and validation
+  async getAccountState(accountId: string): Promise<AccountState> {
+    // Check for optimistic updates first
+    const optimistic = this.optimisticUpdates.get(accountId);
+    if (optimistic && !this.isExpired(optimistic)) {
+      return optimistic.state;
+    }
+    
+    // Fetch from distributed store
+    const state = await this.stateStore.get(`account:${accountId}`);
+    
+    if (!state) {
+      // Initialize new account state
+      return await this.initializeAccountState(accountId);
+    }
+    
+    // Validate state integrity
+    this.validateStateIntegrity(state);
+    
+    return state;
+  }
+  
+  // Update account state with optimistic updates
+  async updateAccountState(
+    accountId: string, 
+    update: Partial<AccountState>,
+    options: UpdateOptions = {}
+  ): Promise<void> {
+    
+    const currentState = await this.getAccountState(accountId);
+    const newState = { ...currentState, ...update };
+    
+    // Apply optimistic update immediately for UI responsiveness
+    if (options.optimistic !== false) {
+      this.optimisticUpdates.set(accountId, {
+        state: newState,
+        timestamp: Date.now(),
+        updateId: uuidv4()
+      });
+      
+      // Notify MFEs of optimistic update
+      this.eventBus.publish({
+        type: 'banking.account.state_updated',
+        source: 'account-state-manager',
+        data: {
+          accountId,
+          state: newState,
+          optimistic: true
+        }
+      });
+    }
+    
+    try {
+      // Perform actual update with version checking
+      await this.stateStore.compareAndSwap(
+        `account:${accountId}`,
+        currentState,
+        newState,
+        {
+          ttl: options.ttl || 3600,
+          version: currentState.version
+        }
+      );
+      
+      // Clear optimistic update on success
+      this.optimisticUpdates.delete(accountId);
+      
+      // Publish confirmed update
+      this.eventBus.publish({
+        type: 'banking.account.state_confirmed',
+        source: 'account-state-manager',
+        data: {
+          accountId,
+          state: newState,
+          previousState: currentState
+        }
+      });
+      
+    } catch (error) {
+      if (error instanceof VersionConflictError) {
+        // Handle concurrent modification
+        await this.handleVersionConflict(accountId, currentState, newState);
+      } else {
+        // Revert optimistic update
+        this.optimisticUpdates.delete(accountId);
+        
+        // Notify of failure
+        this.eventBus.publish({
+          type: 'banking.account.update_failed',
+          source: 'account-state-manager',
+          data: {
+            accountId,
+            error: error.message,
+            originalState: currentState
+          }
+        });
+        
+        throw error;
+      }
+    }
+  }
+  
+  // Handle version conflicts with business logic
+  private async handleVersionConflict(
+    accountId: string,
+    localState: AccountState,
+    remoteState: AccountState
+  ): Promise<void> {
+    
+    // Use conflict resolver to merge states
+    const resolvedState = await this.conflictResolver.resolve({
+      local: localState,
+      remote: remoteState,
+      conflictType: 'version_conflict'
+    });
+    
+    // Apply resolved state
+    await this.stateStore.set(`account:${accountId}`, resolvedState);
+    
+    // Clear optimistic update
+    this.optimisticUpdates.delete(accountId);
+    
+    // Notify of conflict resolution
+    this.eventBus.publish({
+      type: 'banking.account.conflict_resolved',
+      source: 'account-state-manager',
+      data: {
+        accountId,
+        resolvedState,
+        conflictResolution: 'automatic'
+      }
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="pattern-card">
+                                    <h4>💼 Session State Management</h4>
+                                    <div class="pattern-details">
+                                        <p>User session state shared across MFEs with security and expiration handling</p>
+                                        
+                                        <pre><code class="language-typescript">// Session State Manager with Security
+class SessionStateManager {
+  private sessionStore: SecureSessionStore;
+  private encryptionService: EncryptionService;
+  private sessionTimeouts = new Map<string, NodeJS.Timeout>();
+  
+  async createSession(userId: string, authData: AuthData): Promise<SessionState> {
+    const sessionId = this.generateSecureSessionId();
+    
+    const sessionState: SessionState = {
+      sessionId,
+      userId,
+      createdAt: new Date().toISOString(),
+      lastActivity: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(), // 8 hours
+      permissions: authData.permissions,
+      mfeAccess: authData.mfeAccess,
+      securityContext: {
+        ipAddress: authData.ipAddress,
+        userAgent: authData.userAgent,
+        deviceFingerprint: authData.deviceFingerprint
+      },
+      state: {
+        preferences: {},
+        temporaryData: {},
+        navigation: {}
+      }
+    };
+    
+    // Encrypt and store session
+    const encryptedState = await this.encryptionService.encrypt(sessionState);
+    await this.sessionStore.set(sessionId, encryptedState, {
+      ttl: 8 * 60 * 60, // 8 hours
+      secure: true
+    });
+    
+    // Set up automatic cleanup
+    this.scheduleSessionCleanup(sessionId);
+    
+    return sessionState;
+  }
+  
+  async getSessionState(sessionId: string): Promise<SessionState | null> {
+    try {
+      const encryptedState = await this.sessionStore.get(sessionId);
+      if (!encryptedState) return null;
+      
+      const sessionState = await this.encryptionService.decrypt(encryptedState);
+      
+      // Check if session is expired
+      if (new Date() > new Date(sessionState.expiresAt)) {
+        await this.destroySession(sessionId);
+        return null;
+      }
+      
+      // Update last activity
+      sessionState.lastActivity = new Date().toISOString();
+      await this.updateSessionState(sessionId, sessionState);
+      
+      return sessionState;
+      
+    } catch (error) {
+      console.error('Failed to retrieve session:', error);
+      return null;
+    }
+  }
+  
+  // Update session state with partial updates
+  async updateSessionState(
+    sessionId: string, 
+    updates: Partial<SessionState>
+  ): Promise<void> {
+    
+    const currentState = await this.getSessionState(sessionId);
+    if (!currentState) {
+      throw new SessionNotFoundError('Session not found or expired');
+    }
+    
+    const updatedState = {
+      ...currentState,
+      ...updates,
+      lastActivity: new Date().toISOString()
+    };
+    
+    // Encrypt and store
+    const encryptedState = await this.encryptionService.encrypt(updatedState);
+    await this.sessionStore.set(sessionId, encryptedState, {
+      ttl: this.getSessionTTL(updatedState),
+      secure: true
+    });
+    
+    // Broadcast session update to relevant MFEs
+    this.eventBus.publish({
+      type: 'banking.session.updated',
+      source: 'session-state-manager',
+      data: {
+        sessionId,
+        userId: updatedState.userId,
+        updates
+      }
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="performance-monitoring" class="content-section">
+                        <h2>📊 Performance Monitoring & Observability</h2>
+                        
+                        <div class="monitoring-architecture">
+                            <h3>Comprehensive Performance Monitoring</h3>
+                            <p>Real-time monitoring and observability across all layers of the banking platform with automated alerting and performance optimization.</p>
+                            
+                            <div class="monitoring-layers">
+                                <div class="monitoring-card">
+                                    <h4>🖥️ Frontend Performance</h4>
+                                    <div class="monitoring-details">
+                                        <p>Real User Monitoring (RUM) and synthetic monitoring for MFE performance</p>
+                                        
+                                        <pre><code class="language-typescript">// Real User Monitoring for Banking MFEs
+class BankingPerformanceMonitor {
+  private analytics: AnalyticsClient;
+  private performanceObserver: PerformanceObserver;
+  private vitalsCollector: WebVitalsCollector;
+  
+  constructor() {
+    this.analytics = new AnalyticsClient({
+      endpoint: 'https://analytics.banking.company.com',
+      apiKey: process.env.ANALYTICS_API_KEY
+    });
+    
+    this.setupPerformanceObservers();
+    this.collectWebVitals();
+  }
+  
+  private setupPerformanceObservers(): void {
+    // Monitor navigation timing
+    this.performanceObserver = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        this.processPerformanceEntry(entry);
+      }
+    });
+    
+    this.performanceObserver.observe({
+      entryTypes: ['navigation', 'resource', 'measure', 'longtask']
+    });
+  }
+  
+  private collectWebVitals(): void {
+    // Core Web Vitals
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS(this.sendVital.bind(this, 'CLS'));
+      getFID(this.sendVital.bind(this, 'FID'));
+      getFCP(this.sendVital.bind(this, 'FCP'));
+      getLCP(this.sendVital.bind(this, 'LCP'));
+      getTTFB(this.sendVital.bind(this, 'TTFB'));
+    });
+  }
+  
+  private async sendVital(name: string, metric: any): Promise<void> {
+    await this.analytics.track('web_vital', {
+      name,
+      value: metric.value,
+      id: metric.id,
+      url: window.location.href,
+      mfe: this.getCurrentMFE(),
+      userAgent: navigator.userAgent,
+      connectionType: this.getConnectionType(),
+      timestamp: Date.now()
+    });
+    
+    // Alert if performance threshold exceeded
+    if (this.isPerformanceThresholdExceeded(name, metric.value)) {
+      await this.sendPerformanceAlert(name, metric.value);
+    }
+  }
+  
+  // Custom banking-specific metrics
+  async trackTransactionPerformance(transactionId: string, startTime: number): Promise<void> {
+    const duration = Date.now() - startTime;
+    
+    await this.analytics.track('transaction_performance', {
+      transactionId,
+      duration,
+      mfe: this.getCurrentMFE(),
+      timestamp: Date.now()
+    });
+    
+    // Track percentiles for SLA monitoring
+    if (duration > 5000) { // 5 seconds
+      await this.sendPerformanceAlert('slow_transaction', duration, { transactionId });
+    }
+  }
+  
+  async trackMFELoadTime(mfeId: string, loadTime: number): Promise<void> {
+    await this.analytics.track('mfe_load_time', {
+      mfeId,
+      loadTime,
+      cacheHit: this.wasCacheHit(mfeId),
+      networkCondition: this.getNetworkCondition(),
+      timestamp: Date.now()
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="monitoring-card">
+                                    <h4>🔄 API Performance Monitoring</h4>
+                                    <div class="monitoring-details">
+                                        <p>Distributed tracing and API performance metrics with SLA tracking</p>
+                                        
+                                        <pre><code class="language-typescript">// API Performance Monitor with OpenTelemetry
+class APIPerformanceMonitor {
+  private tracer: Tracer;
+  private metricsCollector: MetricsCollector;
+  private slaMonitor: SLAMonitor;
+  
+  constructor() {
+    this.tracer = trace.getTracer('banking-api-monitor');
+    this.metricsCollector = new MetricsCollector();
+    this.slaMonitor = new SLAMonitor({
+      slaThresholds: {
+        'account_balance': { p95: 500, p99: 1000 }, // ms
+        'transaction_processing': { p95: 2000, p99: 5000 },
+        'user_authentication': { p95: 300, p99: 800 }
+      }
+    });
+  }
+  
+  // Middleware for API performance tracking
+  createPerformanceMiddleware(): express.RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const startTime = Date.now();
+      const span = this.tracer.startSpan(`${req.method} ${req.path}`);
+      
+      // Add request context to span
+      span.setAttributes({
+        'http.method': req.method,
+        'http.url': req.url,
+        'http.route': req.route?.path || req.path,
+        'user.id': req.user?.id,
+        'mfe.source': req.headers['x-mfe-source']
+      });
+      
+      // Track request
+      const endMetrics = this.metricsCollector.startTimer('api_request_duration', {
+        method: req.method,
+        route: req.route?.path || req.path
+      });
+      
+      res.on('finish', async () => {
+        const duration = Date.now() - startTime;
+        
+        // End span with response info
+        span.setAttributes({
+          'http.status_code': res.statusCode,
+          'http.response_size': res.get('content-length') || 0
+        });
+        span.end();
+        
+        // Record metrics
+        endMetrics({ status_code: res.statusCode });
+        
+        // Track SLA compliance
+        await this.slaMonitor.recordResponse(req.path, duration, res.statusCode);
+        
+        // Log slow requests
+        if (duration > 1000) {
+          console.warn(`Slow API request: ${req.method} ${req.path} took ${duration}ms`);
+        }
+      });
+      
+      next();
+    };
+  }
+  
+  // Custom banking API metrics
+  async trackDatabaseQuery(query: string, duration: number): Promise<void> {
+    await this.metricsCollector.histogram('database_query_duration', duration, {
+      query_type: this.getQueryType(query),
+      table: this.extractTableName(query)
+    });
+  }
+  
+  async trackCacheHitRate(cacheKey: string, hit: boolean): Promise<void> {
+    await this.metricsCollector.counter('cache_requests_total', 1, {
+      cache_type: this.getCacheType(cacheKey),
+      result: hit ? 'hit' : 'miss'
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="scalability-patterns" class="content-section">
+                        <h2>📈 Scalability Patterns</h2>
+                        
+                        <div class="scalability-architecture">
+                            <h3>Auto-Scaling Banking Infrastructure</h3>
+                            <p>Elastic scaling patterns that handle banking workload spikes while maintaining performance and compliance.</p>
+                            
+                            <div class="scaling-strategies">
+                                <div class="strategy-card">
+                                    <h4>🚀 Horizontal Pod Autoscaling</h4>
+                                    <div class="strategy-details">
+                                        <p>Kubernetes-based auto-scaling for MFE servers and API services</p>
+                                        
+                                        <pre><code class="language-yaml"># HPA Configuration for Banking Services
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: banking-api-hpa
+  namespace: banking-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: banking-api
+  minReplicas: 3
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: transactions_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 5
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 300</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="strategy-card">
+                                    <h4>🔄 Database Scaling</h4>
+                                    <div class="strategy-details">
+                                        <p>Read replicas, connection pooling, and query optimization</p>
+                                        
+                                        <pre><code class="language-typescript">// Database Connection Pool with Auto-scaling
+class BankingDatabasePool {
+                        private readPool: Pool;
+  private writePool: Pool;
+  private metricsCollector: MetricsCollector;
+  private scalingController: DatabaseScalingController;
+  
+  constructor() {
+    this.readPool = new Pool({
+      host: process.env.DB_READ_HOST,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      
+      // Connection pool settings
+      min: 5,
+      max: 50,
+      acquireTimeoutMillis: 30000,
+      createTimeoutMillis: 30000,
+      destroyTimeoutMillis: 5000,
+      idleTimeoutMillis: 30000,
+      reapIntervalMillis: 1000,
+      
+      // Banking-specific settings
+      ssl: {
+        rejectUnauthorized: true,
+        ca: process.env.DB_CA_CERT
+      }
+    });
+    
+    this.writePool = new Pool({
+      host: process.env.DB_WRITE_HOST,
+      // ... similar configuration with different limits
+      min: 2,
+      max: 20 // Fewer write connections
+    });
+    
+    this.setupPoolMonitoring();
+  }
+  
+  async executeQuery<T>(query: string, params: any[], options: QueryOptions = {}): Promise<T[]> {
+    const isWrite = this.isWriteQuery(query);
+    const pool = isWrite ? this.writePool : this.readPool;
+    const startTime = Date.now();
+    
+    try {
+      // Get connection from pool
+      const client = await pool.connect();
+      
+      try {
+        // Execute query with timeout
+        const result = await Promise.race([
+          client.query(query, params),
+          this.createQueryTimeout(options.timeout || 30000)
+        ]);
+        
+        const duration = Date.now() - startTime;
+        
+        // Track metrics
+        await this.metricsCollector.recordQueryMetrics({
+          query_type: isWrite ? 'write' : 'read',
+          duration,
+          rows_affected: result.rowCount
+        });
+        
+        // Trigger scaling if needed
+        await this.scalingController.evaluateScaling({
+          pool_utilization: pool.totalCount / pool.max,
+          query_duration: duration,
+          queue_size: pool.waitingCount
+        });
+        
+        return result.rows;
+        
+      } finally {
+        client.release();
+      }
+      
+    } catch (error) {
+      console.error('Database query failed:', {
+        query: query.substring(0, 100),
+        error: error.message,
+        duration: Date.now() - startTime
+      });
+      
+      throw error;
+    }
+  }
+  
+  private setupPoolMonitoring(): void {
+    setInterval(async () => {
+      const readPoolStats = {
+        total: this.readPool.totalCount,
+        idle: this.readPool.idleCount,
+        waiting: this.readPool.waitingCount
+      };
+      
+      const writePoolStats = {
+        total: this.writePool.totalCount,
+        idle: this.writePool.idleCount,
+        waiting: this.writePool.waitingCount
+      };
+      
+      await this.metricsCollector.gauge('db_pool_connections', readPoolStats.total, {
+        pool: 'read',
+        state: 'total'
+      });
+      
+      await this.metricsCollector.gauge('db_pool_connections', readPoolStats.idle, {
+        pool: 'read',
+        state: 'idle'
+      });
+      
+      // Alert if pool utilization is high
+      if (readPoolStats.waiting > 10) {
+        await this.sendPoolAlert('read', readPoolStats);
+      }
+      
+    }, 10000); // Every 10 seconds
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="fault-tolerance" class="content-section">
+                        <h2>🛡️ Fault Tolerance Mechanisms</h2>
+                        
+                        <div class="fault-tolerance-architecture">
+                            <h3>Banking-Grade Fault Tolerance</h3>
+                            <p>Multi-layer fault tolerance ensuring banking operations continue even during partial system failures.</p>
+                            
+                            <div class="tolerance-patterns">
+                                <div class="pattern-card">
+                                    <h4>⚡ Circuit Breaker Pattern</h4>
+                                    <div class="pattern-details">
+                                        <p>Prevent cascade failures and provide graceful degradation</p>
+                                        
+                                        <pre><code class="language-typescript">// Advanced Circuit Breaker for Banking Services
+class BankingCircuitBreaker {
+  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private failureCount = 0;
+  private successCount = 0;
+  private lastFailureTime = 0;
+  private requestCount = 0;
+  private metrics: CircuitBreakerMetrics;
+  
+  constructor(
+    private config: CircuitBreakerConfig,
+    private fallbackService: FallbackService
+  ) {
+    this.metrics = new CircuitBreakerMetrics();
+  }
+  
+  async execute<T>(
+    operation: () => Promise<T>,
+    context: OperationContext
+  ): Promise<T> {
+    
+    // Check circuit state
+    if (this.state === 'OPEN') {
+      if (Date.now() - this.lastFailureTime < this.config.openTimeout) {
+        // Circuit is open, use fallback
+        return await this.executeFallback(context);
+      } else {
+        // Try to close circuit
+        this.state = 'HALF_OPEN';
+        this.successCount = 0;
+      }
+    }
+    
+    this.requestCount++;
+    
+    try {
+      const startTime = Date.now();
+      
+      // Execute with timeout
+      const result = await Promise.race([
+        operation(),
+        this.createTimeout(context.timeout || this.config.timeout)
+      ]);
+      
+      const duration = Date.now() - startTime;
+      
+      // Operation succeeded
+      this.onSuccess(duration, context);
+      
+      return result;
+      
+    } catch (error) {
+      // Operation failed
+      this.onFailure(error, context);
+      
+      // Return fallback result
+      return await this.executeFallback(context);
+    }
+  }
+  
+  private onSuccess(duration: number, context: OperationContext): void {
+    this.failureCount = 0;
+    
+    if (this.state === 'HALF_OPEN') {
+      this.successCount++;
+      
+      // Close circuit if enough successes
+      if (this.successCount >= this.config.successThreshold) {
+        this.state = 'CLOSED';
+        console.log(`Circuit breaker CLOSED for ${context.operation}`);
+      }
+    }
+    
+    // Record metrics
+    this.metrics.recordSuccess(context.operation, duration);
+  }
+  
+  private onFailure(error: Error, context: OperationContext): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    
+    // Open circuit if failure threshold exceeded
+    if (this.failureCount >= this.config.failureThreshold) {
+      this.state = 'OPEN';
+      console.warn(`Circuit breaker OPENED for ${context.operation}`);
+      
+      // Send alert
+      this.sendCircuitBreakerAlert(context.operation, error);
+    }
+    
+    // Record metrics
+    this.metrics.recordFailure(context.operation, error);
+  }
+  
+  private async executeFallback<T>(context: OperationContext): Promise<T> {
+    // Banking-specific fallbacks
+    switch (context.operation) {
+      case 'get_account_balance':
+        return await this.fallbackService.getCachedBalance(context.accountId);
+        
+      case 'process_transaction':
+        return await this.fallbackService.queueTransactionForLater(context.transaction);
+        
+      case 'get_user_preferences':
+        return await this.fallbackService.getDefaultPreferences(context.userId);
+        
+      default:
+        throw new ServiceUnavailableError('Service temporarily unavailable');
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="pattern-card">
+                                    <h4>🔄 Retry with Exponential Backoff</h4>
+                                    <div class="pattern-details">
+                                        <p>Intelligent retry mechanisms for transient failures</p>
+                                        
+                                        <pre><code class="language-typescript">// Banking Retry Service with Smart Backoff
+class BankingRetryService {
+  private retryPolicies: Map<string, RetryPolicy>;
+  
+  constructor() {
+    this.retryPolicies = new Map([
+      ['account_api', {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 10000,
+        backoffMultiplier: 2,
+        jitter: true,
+        retryableErrors: ['ECONNRESET', 'ETIMEDOUT', '503', '502', '504']
+      }],
+      ['payment_processing', {
+        maxAttempts: 2, // Fewer retries for financial transactions
+        baseDelay: 2000,
+        maxDelay: 5000,
+        backoffMultiplier: 1.5,
+        jitter: false, // No jitter for payments
+        retryableErrors: ['ETIMEDOUT', '503'] // Limited error types
+      }],
+      ['notification_service', {
+        maxAttempts: 5,
+        baseDelay: 500,
+        maxDelay: 30000,
+        backoffMultiplier: 2,
+        jitter: true,
+        retryableErrors: ['ECONNRESET', 'ETIMEDOUT', '429', '503', '502', '504']
+      }]
+    ]);
+  }
+  
+  async executeWithRetry<T>(
+    operation: () => Promise<T>,
+    operationType: string,
+    context: RetryContext = {}
+  ): Promise<T> {
+    
+    const policy = this.retryPolicies.get(operationType);
+    if (!policy) {
+      throw new Error(`No retry policy defined for ${operationType}`);
+    }
+    
+    let attempt = 0;
+    let lastError: Error;
+    
+    while (attempt < policy.maxAttempts) {
+      try {
+        // Add attempt context
+        const attemptContext = {
+          ...context,
+          attempt: attempt + 1,
+          maxAttempts: policy.maxAttempts
+        };
+        
+        return await operation();
+        
+      } catch (error) {
+        lastError = error;
+        attempt++;
+        
+        // Check if error is retryable
+        if (!this.isRetryableError(error, policy)) {
+          throw error;
+        }
+        
+        // Don't retry on last attempt
+        if (attempt >= policy.maxAttempts) {
+          break;
+        }
+        
+        // Calculate delay with exponential backoff
+        const delay = this.calculateDelay(attempt, policy);
+        
+        console.warn(`Retry attempt ${attempt} for ${operationType} after ${delay}ms`, {
+          error: error.message,
+          context
+        });
+        
+        // Wait before retry
+        await this.sleep(delay);
+      }
+    }
+    
+    // All retries failed
+    throw new RetryExhaustedError(
+      `Operation ${operationType} failed after ${policy.maxAttempts} attempts`,
+      lastError,
+      attempt
+    );
+  }
+  
+  private calculateDelay(attempt: number, policy: RetryPolicy): number {
+    // Exponential backoff: baseDelay * (backoffMultiplier ^ attempt)
+    let delay = policy.baseDelay * Math.pow(policy.backoffMultiplier, attempt - 1);
+    
+    // Cap at max delay
+    delay = Math.min(delay, policy.maxDelay);
+    
+    // Add jitter to prevent thundering herd
+    if (policy.jitter) {
+      const jitterRange = delay * 0.1; // 10% jitter
+      delay += (Math.random() - 0.5) * 2 * jitterRange;
+    }
+    
+    return Math.floor(delay);
+  }
+  
+  private isRetryableError(error: Error, policy: RetryPolicy): boolean {
+    // Check error code/message against retryable errors
+    return policy.retryableErrors.some(retryableError => {
+      return error.message.includes(retryableError) ||
+             error.code === retryableError ||
+             (error as any).status === parseInt(retryableError);
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="load-optimization" class="content-section">
+                        <h2>🚀 Load Optimization Strategies</h2>
+                        
+                        <div class="load-optimization">
+                            <h3>Banking Application Load Optimization</h3>
+                            <p>Advanced load optimization techniques for banking applications, including lazy loading, code splitting, and resource prioritization.</p>
+                            
+                            <div class="optimization-techniques">
+                                <div class="technique-card">
+                                    <h4>📦 Advanced Code Splitting</h4>
+                                    <div class="technique-details">
+                                        <pre><code class="language-typescript">// Banking MFE Code Splitting Strategy
+class BankingCodeSplitter {
+  private loadedChunks = new Set<string>();
+  private chunkRegistry = new Map<string, ChunkInfo>();
+  
+  constructor() {
+    this.initializeChunkRegistry();
+  }
+  
+  // Critical path: Load immediately
+  async loadCriticalFeatures(): Promise<void> {
+    const criticalChunks = [
+      'authentication',
+      'account-summary',
+      'navigation'
+    ];
+    
+    await Promise.all(
+      criticalChunks.map(chunk => this.loadChunk(chunk, 'critical'))
+    );
+  }
+  
+  // High priority: Load after critical
+  async loadHighPriorityFeatures(): Promise<void> {
+    const highPriorityChunks = [
+      'transaction-history',
+      'quick-pay',
+      'alerts'
+    ];
+    
+    // Load with slight delay to not block critical path
+    setTimeout(async () => {
+      await Promise.all(
+        highPriorityChunks.map(chunk => this.loadChunk(chunk, 'high'))
+      );
+    }, 100);
+  }
+  
+  // Load features on demand
+  async loadFeatureOnDemand(featureName: string): Promise<any> {
+    if (this.loadedChunks.has(featureName)) {
+      return this.getLoadedFeature(featureName);
+    }
+    
+    const chunkInfo = this.chunkRegistry.get(featureName);
+    if (!chunkInfo) {
+      throw new Error(`Unknown feature: ${featureName}`);
+    }
+    
+    // Show loading indicator for non-critical features
+    if (chunkInfo.priority !== 'critical') {
+      this.showLoadingIndicator(featureName);
+    }
+    
+    try {
+      const feature = await this.loadChunk(featureName, chunkInfo.priority);
+      this.hideLoadingIndicator(featureName);
+      return feature;
+    } catch (error) {
+      this.hideLoadingIndicator(featureName);
+      throw error;
+    }
+  }
+  
+  private async loadChunk(chunkName: string, priority: string): Promise<any> {
+    try {
+      let module;
+      
+      // Dynamic imports based on feature
+      switch (chunkName) {
+        case 'investment-portfolio':
+          module = await import(
+            /* webpackChunkName: "investment-portfolio" */
+            /* webpackPreload: true */
+            './features/InvestmentPortfolio'
+          );
+          break;
+          
+        case 'loan-applications':
+          module = await import(
+            /* webpackChunkName: "loan-applications" */
+            /* webpackPrefetch: true */
+            './features/LoanApplications'
+          );
+          break;
+          
+        case 'wealth-management':
+          module = await import(
+            /* webpackChunkName: "wealth-management" */
+            './features/WealthManagement'
+          );
+          break;
+          
+        default:
+          throw new Error(`Unknown chunk: ${chunkName}`);
+      }
+      
+      this.loadedChunks.add(chunkName);
+      this.cacheLoadedModule(chunkName, module);
+      
+      // Track loading performance
+      this.trackChunkLoadPerformance(chunkName, priority);
+      
+      return module.default || module;
+      
+    } catch (error) {
+      console.error(`Failed to load chunk ${chunkName}:`, error);
+      
+      // Fallback for critical chunks
+      if (priority === 'critical') {
+        return await this.loadFallbackChunk(chunkName);
+      }
+      
+      throw error;
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="technique-card">
+                                    <h4>🎯 Resource Prioritization</h4>
+                                    <div class="technique-details">
+                                        <pre><code class="language-typescript">// Banking Resource Prioritization
+class BankingResourcePrioritizer {
+  private resourceQueue: PriorityQueue<ResourceRequest>;
+  private loadingResources = new Set<string>();
+  
+  constructor() {
+    this.resourceQueue = new PriorityQueue((a, b) => b.priority - a.priority);
+    this.startResourceProcessor();
+  }
+  
+  // Prioritize resources based on banking business logic
+  prioritizeResource(resource: ResourceRequest): number {
+    let priority = 0;
+    
+    // Critical banking operations get highest priority
+    if (resource.type === 'authentication' || 
+        resource.type === 'account-balance' ||
+        resource.type === 'fraud-detection') {
+      priority += 1000;
+    }
+    
+    // Transaction-related resources
+    if (resource.type === 'payment-processing' ||
+        resource.type === 'transaction-history') {
+      priority += 800;
+    }
+    
+    // User interface components
+    if (resource.type === 'dashboard' ||
+        resource.type === 'navigation') {
+      priority += 600;
+    }
+    
+    // Nice-to-have features
+    if (resource.type === 'investment-tools' ||
+        resource.type === 'financial-planning') {
+      priority += 400;
+    }
+    
+    // Adjust based on user context
+    if (resource.userSpecific && this.isHighValueCustomer()) {
+      priority += 200;
+    }
+    
+    // Boost recently used resources
+    if (this.wasRecentlyUsed(resource.id)) {
+      priority += 100;
+    }
+    
+    return priority;
+  }
+  
+  async loadResource(resourceId: string, type: string): Promise<any> {
+    // Check if already loaded
+    if (this.isResourceLoaded(resourceId)) {
+      return this.getLoadedResource(resourceId);
+    }
+    
+    // Check if currently loading
+    if (this.loadingResources.has(resourceId)) {
+      return this.waitForResource(resourceId);
+    }
+    
+    const request: ResourceRequest = {
+      id: resourceId,
+      type,
+      priority: this.prioritizeResource({ id: resourceId, type } as ResourceRequest),
+      requestTime: Date.now(),
+      userSpecific: this.isUserSpecificResource(type)
+    };
+    
+    this.resourceQueue.enqueue(request);
+    
+    return this.waitForResource(resourceId);
+  }
+  
+  private async startResourceProcessor(): Promise<void> {
+    while (true) {
+      if (!this.resourceQueue.isEmpty()) {
+        const request = this.resourceQueue.dequeue();
+        
+        // Skip if already loaded
+        if (this.isResourceLoaded(request.id)) {
+          continue;
+        }
+        
+        this.loadingResources.add(request.id);
+        
+        try {
+          await this.processResourceRequest(request);
+        } catch (error) {
+          console.error(`Failed to load resource ${request.id}:`, error);
+        } finally {
+          this.loadingResources.delete(request.id);
+        }
+      }
+      
+      // Small delay to prevent busy waiting
+      await this.sleep(10);
+    }
+  }
+  
+  private async processResourceRequest(request: ResourceRequest): Promise<void> {
+    const startTime = Date.now();
+    
+    try {
+      let resource;
+      
+      // Load resource based on type
+      switch (request.type) {
+        case 'mfe-component':
+          resource = await this.loadMFEComponent(request.id);
+          break;
+          
+        case 'api-data':
+          resource = await this.loadAPIData(request.id);
+          break;
+          
+        case 'static-asset':
+          resource = await this.loadStaticAsset(request.id);
+          break;
+          
+        default:
+          throw new Error(`Unknown resource type: ${request.type}`);
+      }
+      
+      // Cache the loaded resource
+      this.cacheResource(request.id, resource);
+      
+      // Track loading performance
+      const loadTime = Date.now() - startTime;
+      this.trackResourceLoadTime(request.id, request.type, loadTime);
+      
+      // Notify waiters
+      this.notifyResourceLoaded(request.id, resource);
+      
+    } catch (error) {
+      this.notifyResourceError(request.id, error);
+      throw error;
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="next-steps">
+                        <h2>Next: Enterprise Security & AI Integration</h2>
+                        <div class="next-buttons">
+                            <a href="resilience.html" class="btn btn-primary">Resilience & Security →</a>
+                            <a href="ai-integration.html" class="btn btn-secondary">AI Integration →</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Banking UI Architecture - Technical Presentation</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

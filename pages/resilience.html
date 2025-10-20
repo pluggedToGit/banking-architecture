@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resilience & Security - Banking Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html">Banking Architecture</a></h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="micro-frontends.html" class="nav-link">Micro Frontends</a>
+                </li>
+                <li class="nav-item">
+                    <a href="aws-architecture.html" class="nav-link">AWS Infrastructure</a>
+                </li>
+                <li class="nav-item">
+                    <a href="performance.html" class="nav-link">Performance</a>
+                </li>
+                <li class="nav-item">
+                    <a href="resilience.html" class="nav-link active">Resilience & Security</a>
+                </li>
+                <li class="nav-item">
+                    <a href="ai-integration.html" class="nav-link">AI Integration</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Enterprise Security & Entitlement Framework</h1>
+                <p>ADFS Integration and fine-grained access control for banking micro frontends</p>
+            </div>
+
+            <div class="content-grid">
+                <aside class="sidebar">
+                    <nav class="page-nav">
+                        <h3>Contents</h3>
+                        <ul>
+                            <li><a href="#adfs-integration">ADFS Integration</a></li>
+                            <li><a href="#entitlement-framework">Entitlement Framework</a></li>
+                            <li><a href="#mfe-authorization">MFE Authorization</a></li>
+                            <li><a href="#token-management">Token Management</a></li>
+                            <li><a href="#role-mapping">Role Mapping</a></li>
+                            <li><a href="#security-policies">Security Policies</a></li>
+                            <li><a href="#audit-compliance">Audit & Compliance</a></li>
+                            <li><a href="#fault-tolerance">Fault Tolerance</a></li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <article class="main-content">
+                    <section id="adfs-integration" class="content-section">
+                        <h2>🔐 ADFS Integration Architecture</h2>
+                        
+                        <div class="integration-overview">
+                            <h3>Enterprise Identity Integration</h3>
+                            <p>Our banking platform integrates with existing Active Directory Federation Services (ADFS) to leverage the bank's established identity management system while providing fine-grained access control for each micro frontend.</p>
+                            
+                            <div class="integration-benefits">
+                                <div class="benefit-card">
+                                    <h4>🏦 Existing Identity Leverage</h4>
+                                    <p>Use existing ADFS infrastructure without requiring new user accounts or identity systems</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>🔄 Single Sign-On (SSO)</h4>
+                                    <p>Users authenticate once with ADFS and access all authorized MFEs seamlessly</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>🎯 Fine-grained Control</h4>
+                                    <p>Map ADFS roles and groups to specific MFE permissions and feature access</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>📊 Centralized Audit</h4>
+                                    <p>All authentication and authorization events flow through existing audit systems</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="adfs-flow">
+                            <h3>ADFS Authentication Flow</h3>
+                            <div class="flow-diagram">
+                                <div class="flow-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h4>User Access Attempt</h4>
+                                        <p>User attempts to access banking application</p>
+                                    </div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h4>ADFS Redirect</h4>
+                                        <p>Shell app redirects to ADFS for authentication</p>
+                                    </div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h4>ADFS Authentication</h4>
+                                        <p>User authenticates with Active Directory credentials</p>
+                                    </div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <h4>SAML Token Response</h4>
+                                        <p>ADFS issues SAML token with user claims and group memberships</p>
+                                    </div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-number">5</div>
+                                    <div class="step-content">
+                                        <h4>Token Exchange</h4>
+                                        <p>Banking auth service converts SAML to JWT with MFE permissions</p>
+                                    </div>
+                                </div>
+                                <div class="flow-step">
+                                    <div class="step-number">6</div>
+                                    <div class="step-content">
+                                        <h4>MFE Authorization</h4>
+                                        <p>Shell app loads authorized MFEs based on JWT claims</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="technical-implementation">
+                            <h3>Technical Implementation</h3>
+                            <div class="implementation-details">
+                                <h4>ADFS Configuration</h4>
+                                <pre><code class="language-xml">&lt;!-- ADFS Relying Party Trust Configuration --&gt;
+&lt;RelyingParty&gt;
+  &lt;Identifier&gt;https://banking.company.com&lt;/Identifier&gt;
+  &lt;Name&gt;Banking MFE Platform&lt;/Name&gt;
+  &lt;Enabled&gt;true&lt;/Enabled&gt;
+  &lt;Profile&gt;SAML&lt;/Profile&gt;
+  
+  &lt;!-- SAML Endpoint Configuration --&gt;
+  &lt;SamlEndpoints&gt;
+    &lt;SamlEndpoint&gt;
+      &lt;EndpointType&gt;AssertionConsumerService&lt;/EndpointType&gt;
+      &lt;Binding&gt;urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST&lt;/Binding&gt;
+      &lt;Location&gt;https://banking.company.com/auth/saml/callback&lt;/Location&gt;
+      &lt;Index&gt;0&lt;/Index&gt;
+      &lt;IsDefault&gt;true&lt;/IsDefault&gt;
+    &lt;/SamlEndpoint&gt;
+  &lt;/SamlEndpoints&gt;
+  
+  &lt;!-- Claims Rules --&gt;
+  &lt;ClaimRules&gt;
+    &lt;ClaimRule&gt;
+      &lt;RuleName&gt;Send User Attributes&lt;/RuleName&gt;
+      &lt;RuleTemplate&gt;LdapClaims&lt;/RuleTemplate&gt;
+      &lt;Parameters&gt;
+        &lt;Parameter&gt;c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"]&lt;/Parameter&gt;
+        &lt;Parameter&gt;=&gt; issue(store = "Active Directory", types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", 
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+                    "http://banking.company.com/claims/employeeid",
+                    "http://banking.company.com/claims/department",
+                    "http://banking.company.com/claims/jobtitle"), 
+                    query = ";cn,mail,employeeID,department,title;{0}", param = c.Value);&lt;/Parameter&gt;
+      &lt;/Parameters&gt;
+    &lt;/ClaimRule&gt;
+    
+    &lt;ClaimRule&gt;
+      &lt;RuleName&gt;Send Group Memberships&lt;/RuleName&gt;
+      &lt;RuleTemplate&gt;GroupClaims&lt;/RuleTemplate&gt;
+      &lt;Parameters&gt;
+        &lt;Parameter&gt;c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"]&lt;/Parameter&gt;
+        &lt;Parameter&gt;=&gt; issue(store = "Active Directory", types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"), 
+                    query = ";tokenGroups(longDomainQualifiedName);{0}", param = c.Value);&lt;/Parameter&gt;
+      &lt;/Parameters&gt;
+    &lt;/ClaimRule&gt;
+  &lt;/ClaimRules&gt;
+&lt;/RelyingParty&gt;</code></pre>
+
+                                <h4>SAML Token Processing Service</h4>
+                                <pre><code class="language-typescript">// SAML Token Processing and JWT Generation
+import { SAML } from '@node-saml/node-saml';
+import jwt from 'jsonwebtoken';
+
+interface ADFSClaims {
+  name: string;
+  email: string;
+  employeeId: string;
+  department: string;
+  jobTitle: string;
+  roles: string[];
+  groups: string[];
+}
+
+interface MFEPermissions {
+  mfeId: string;
+  permissions: string[];
+  features: string[];
+  accessLevel: 'read' | 'write' | 'admin';
+}
+
+class ADFSTokenProcessor {
+  private samlConfig: SAML.SamlConfig;
+  private entitlementService: EntitlementService;
+  
+  constructor() {
+    this.samlConfig = {
+      cert: process.env.ADFS_CERTIFICATE,
+      issuer: 'https://banking.company.com',
+      audience: 'https://adfs.company.com/adfs/services/trust',
+      identifierFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
+    };
+    
+    this.entitlementService = new EntitlementService();
+  }
+  
+  async processSAMLResponse(samlResponse: string): Promise<string> {
+    try {
+      // Validate and parse SAML response
+      const saml = new SAML(this.samlConfig);
+      const profile = await saml.validatePostResponse({ SAMLResponse: samlResponse });
+      
+      // Extract claims from SAML response
+      const adfsClaims = this.extractClaims(profile);
+      
+      // Map ADFS groups to MFE permissions
+      const mfePermissions = await this.mapGroupsToPermissions(adfsClaims.groups);
+      
+      // Generate JWT token with MFE permissions
+      const jwtToken = this.generateJWTToken(adfsClaims, mfePermissions);
+      
+      // Cache user permissions for quick access
+      await this.cacheUserPermissions(adfsClaims.employeeId, mfePermissions);
+      
+      return jwtToken;
+      
+    } catch (error) {
+      console.error('SAML processing failed:', error);
+      throw new AuthenticationError('Invalid SAML response');
+    }
+  }
+  
+  private extractClaims(profile: any): ADFSClaims {
+    return {
+      name: profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
+      email: profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+      employeeId: profile['http://banking.company.com/claims/employeeid'],
+      department: profile['http://banking.company.com/claims/department'],
+      jobTitle: profile['http://banking.company.com/claims/jobtitle'],
+      roles: profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role'] || [],
+      groups: this.parseGroups(profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role'])
+    };
+  }
+  
+  private async mapGroupsToPermissions(adfsGroups: string[]): Promise<MFEPermissions[]> {
+    const permissionMappings = await this.entitlementService.getGroupMappings();
+    const mfePermissions: MFEPermissions[] = [];
+    
+    for (const group of adfsGroups) {
+      const mapping = permissionMappings[group];
+      if (mapping) {
+        mfePermissions.push(...mapping.mfePermissions);
+      }
+    }
+    
+    // Consolidate permissions by MFE
+    return this.consolidatePermissions(mfePermissions);
+  }
+  
+  private generateJWTToken(claims: ADFSClaims, permissions: MFEPermissions[]): string {
+    const tokenPayload = {
+      // Standard claims
+      sub: claims.employeeId,
+      name: claims.name,
+      email: claims.email,
+      
+      // Banking-specific claims
+      department: claims.department,
+      jobTitle: claims.jobTitle,
+      employeeId: claims.employeeId,
+      
+      // MFE permissions
+      mfePermissions: permissions,
+      
+      // Authorization scopes
+      scopes: this.generateScopes(permissions),
+      
+      // Token metadata
+      iss: 'banking-auth-service',
+      aud: 'banking-mfe-platform',
+      exp: Math.floor(Date.now() / 1000) + (8 * 60 * 60), // 8 hours
+      iat: Math.floor(Date.now() / 1000)
+    };
+    
+    return jwt.sign(tokenPayload, process.env.JWT_PRIVATE_KEY, { algorithm: 'RS256' });
+  }
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="entitlement-framework" class="content-section">
+                        <h2>🎯 Entitlement Framework</h2>
+                        
+                        <div class="entitlement-architecture">
+                            <h3>Permission Mapping Strategy</h3>
+                            <p>The entitlement framework maps ADFS groups and roles to specific MFE permissions, enabling fine-grained access control at both the application and feature level.</p>
+                            
+                            <div class="permission-layers">
+                                <div class="permission-layer">
+                                    <h4>🏢 ADFS Group Structure</h4>
+                                    <div class="group-hierarchy">
+                                        <pre><code class="language-yaml"># ADFS Group Hierarchy (Active Directory)
+Banking_Users:
+  description: "All banking platform users"
+  members: "All employees with platform access"
+
+# Functional Groups
+Banking_Tellers:
+  description: "Teller operations staff"
+  permissions: ["customer_lookup", "basic_transactions", "cash_handling"]
+  
+Banking_CustomerService:
+  description: "Customer service representatives" 
+  permissions: ["customer_management", "account_services", "dispute_handling"]
+  
+Banking_Managers:
+  description: "Branch and department managers"
+  permissions: ["team_oversight", "approval_workflows", "reporting"]
+  
+Banking_WealthAdvisors:
+  description: "Investment and wealth management advisors"
+  permissions: ["portfolio_management", "investment_advice", "client_portfolios"]
+
+# Administrative Groups  
+Banking_ITAdmins:
+  description: "IT administrators and developers"
+  permissions: ["system_admin", "user_management", "configuration"]
+  
+Banking_ComplianceOfficers:
+  description: "Compliance and risk management officers"
+  permissions: ["audit_access", "compliance_reporting", "risk_monitoring"]
+
+# Regional Groups
+Banking_NA_Users:
+  description: "North America region users"
+  region: "north_america"
+  compliance_requirements: ["SOX", "PCI_DSS"]
+  
+Banking_EU_Users:
+  description: "European region users" 
+  region: "europe"
+  compliance_requirements: ["GDPR", "PCI_DSS"]</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="permission-layer">
+                                    <h4>🔗 Group to MFE Permission Mapping</h4>
+                                    <div class="mapping-configuration">
+                                        <pre><code class="language-json">{
+  "entitlement_mappings": {
+    "Banking_Tellers": {
+      "mfe_permissions": [
+        {
+          "mfeId": "customer-lookup",
+          "permissions": ["customers.read", "accounts.read"],
+          "features": ["basic_search", "account_summary"],
+          "accessLevel": "read",
+          "restrictions": {
+            "daily_transaction_limit": 50000,
+            "customer_segment": ["retail"],
+            "time_restrictions": ["business_hours"]
+          }
+        },
+        {
+          "mfeId": "transaction-processing",
+          "permissions": ["transactions.create", "transactions.read"],
+          "features": ["deposits", "withdrawals", "basic_transfers"],
+          "accessLevel": "write",
+          "restrictions": {
+            "transaction_types": ["deposit", "withdrawal", "internal_transfer"],
+            "amount_limit": 10000,
+            "approval_required_above": 5000
+          }
+        }
+      ]
+    },
+    
+    "Banking_CustomerService": {
+      "mfe_permissions": [
+        {
+          "mfeId": "customer-management",
+          "permissions": ["customers.read", "customers.write", "accounts.read", "accounts.write"],
+          "features": ["full_customer_profile", "account_management", "service_requests"],
+          "accessLevel": "write",
+          "restrictions": {
+            "customer_segment": ["retail", "small_business"],
+            "sensitive_data_access": false
+          }
+        },
+        {
+          "mfeId": "dispute-management",
+          "permissions": ["disputes.read", "disputes.write", "chargebacks.create"],
+          "features": ["dispute_creation", "case_management", "document_upload"],
+          "accessLevel": "write",
+          "restrictions": {
+            "dispute_amount_limit": 25000,
+            "escalation_required_above": 10000
+          }
+        }
+      ]
+    },
+    
+    "Banking_WealthAdvisors": {
+      "mfe_permissions": [
+        {
+          "mfeId": "investment-portfolio",
+          "permissions": ["portfolios.read", "portfolios.write", "investments.trade"],
+          "features": ["portfolio_analysis", "trade_execution", "risk_assessment", "performance_reporting"],
+          "accessLevel": "admin",
+          "restrictions": {
+            "client_segment": ["high_net_worth", "ultra_high_net_worth"],
+            "trading_authorization": true,
+            "fiduciary_access": true
+          }
+        },
+        {
+          "mfeId": "client-reporting",
+          "permissions": ["reports.generate", "reports.schedule", "reports.export"],
+          "features": ["custom_reports", "automated_scheduling", "pdf_export"],
+          "accessLevel": "write",
+          "restrictions": {
+            "report_types": ["performance", "tax", "allocation", "risk"]
+          }
+        }
+      ]
+    },
+    
+    "Banking_Managers": {
+      "inherits_from": ["Banking_CustomerService"],
+      "additional_permissions": [
+        {
+          "mfeId": "management-dashboard",
+          "permissions": ["teams.read", "performance.read", "approvals.write"],
+          "features": ["team_analytics", "approval_workflows", "branch_metrics"],
+          "accessLevel": "admin",
+          "restrictions": {
+            "team_scope": "managed_teams_only",
+            "approval_limits": {
+              "transaction_approval": 100000,
+              "policy_exception": true,
+              "staff_override": true
+            }
+          }
+        }
+      ]
+    }
+  },
+  
+  "regional_policies": {
+    "north_america": {
+      "compliance_features": ["sox_audit_trail", "pci_dss_controls"],
+      "data_residency": "us_east_1",
+      "additional_restrictions": {
+        "cross_border_transactions": false,
+        "enhanced_logging": true
+      }
+    },
+    "europe": {
+      "compliance_features": ["gdpr_controls", "data_portability", "right_to_deletion"],
+      "data_residency": "eu_west_1", 
+      "additional_restrictions": {
+        "data_processing_consent": true,
+        "cross_border_data_transfer": "approved_countries_only"
+      }
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="entitlement-service">
+                            <h3>Entitlement Service Implementation</h3>
+                            <div class="service-implementation">
+                                <pre><code class="language-typescript">// Entitlement Service - Maps ADFS groups to MFE permissions
+class EntitlementService {
+  private dynamoClient: DynamoDBClient;
+  private redis: Redis;
+  private permissionCache = new Map<string, MFEPermissions[]>();
+  
+  constructor() {
+    this.dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+    this.redis = new Redis({
+      host: process.env.REDIS_ENTITLEMENT_CACHE_HOST,
+      port: 6379
+    });
+  }
+  
+  async getGroupMappings(): Promise<Record<string, GroupMapping>> {
+    try {
+      // Check cache first
+      const cached = await this.redis.get('entitlement_mappings');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+      
+      // Fetch from DynamoDB
+      const response = await this.dynamoClient.send(new GetItemCommand({
+        TableName: 'banking-entitlement-config',
+        Key: {
+          config_type: { S: 'group_mappings' },
+          version: { S: 'current' }
+        }
+      }));
+      
+      const mappings = this.unmarshallMappings(response.Item);
+      
+      // Cache for 1 hour
+      await this.redis.setex('entitlement_mappings', 3600, JSON.stringify(mappings));
+      
+      return mappings;
+      
+    } catch (error) {
+      console.error('Failed to fetch group mappings:', error);
+      throw new EntitlementError('Unable to load entitlement configuration');
+    }
+  }
+  
+  async evaluateUserPermissions(
+    userId: string, 
+    adfsGroups: string[], 
+    requestedMfe: string
+  ): Promise<EvaluationResult> {
+    
+    // Get group mappings
+    const groupMappings = await this.getGroupMappings();
+    
+    // Collect permissions from all user groups
+    const userPermissions: MFEPermissions[] = [];
+    const applicableGroups: string[] = [];
+    
+    for (const group of adfsGroups) {
+      if (groupMappings[group]) {
+        applicableGroups.push(group);
+        
+        // Handle inheritance
+        if (groupMappings[group].inherits_from) {
+          for (const parentGroup of groupMappings[group].inherits_from) {
+            if (groupMappings[parentGroup]) {
+              userPermissions.push(...groupMappings[parentGroup].mfe_permissions);
+            }
+          }
+        }
+        
+        // Add direct permissions
+        userPermissions.push(...groupMappings[group].mfe_permissions);
+      }
+    }
+    
+    // Find permissions for requested MFE
+    const mfePermission = userPermissions.find(p => p.mfeId === requestedMfe);
+    
+    if (!mfePermission) {
+      return {
+        authorized: false,
+        reason: 'No permissions found for requested MFE',
+        deniedMfe: requestedMfe
+      };
+    }
+    
+    // Evaluate time-based restrictions
+    const timeRestrictions = mfePermission.restrictions?.time_restrictions;
+    if (timeRestrictions && !this.isWithinTimeRestrictions(timeRestrictions)) {
+      return {
+        authorized: false,
+        reason: 'Access denied due to time restrictions',
+        deniedMfe: requestedMfe
+      };
+    }
+    
+    // Evaluate regional restrictions
+    const userRegion = await this.getUserRegion(userId);
+    const regionalPolicies = await this.getRegionalPolicies(userRegion);
+    
+    return {
+      authorized: true,
+      permissions: mfePermission.permissions,
+      features: mfePermission.features,
+      accessLevel: mfePermission.accessLevel,
+      restrictions: {
+        ...mfePermission.restrictions,
+        ...regionalPolicies.additional_restrictions
+      },
+      applicableGroups,
+      regionalCompliance: regionalPolicies.compliance_features
+    };
+  }
+  
+  async validateFeatureAccess(
+    userId: string, 
+    mfeId: string, 
+    featureId: string,
+    context?: AccessContext
+  ): Promise<boolean> {
+    
+    const userPermissions = await this.getUserCachedPermissions(userId);
+    const mfePermission = userPermissions.find(p => p.mfeId === mfeId);
+    
+    if (!mfePermission || !mfePermission.features.includes(featureId)) {
+      return false;
+    }
+    
+    // Evaluate contextual restrictions
+    if (context && mfePermission.restrictions) {
+      // Check transaction limits
+      if (context.transactionAmount && mfePermission.restrictions.amount_limit) {
+        if (context.transactionAmount > mfePermission.restrictions.amount_limit) {
+          return false;
+        }
+      }
+      
+      // Check customer segment access
+      if (context.customerSegment && mfePermission.restrictions.customer_segment) {
+        if (!mfePermission.restrictions.customer_segment.includes(context.customerSegment)) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
+  }
+  
+  private isWithinTimeRestrictions(restrictions: string[]): boolean {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
+    
+    for (const restriction of restrictions) {
+      switch (restriction) {
+        case 'business_hours':
+          // 8 AM - 6 PM, Monday - Friday
+          if (currentDay >= 1 && currentDay <= 5 && currentHour >= 8 && currentHour < 18) {
+            return true;
+          }
+          break;
+          
+        case 'extended_hours':
+          // 6 AM - 10 PM, Monday - Friday
+          if (currentDay >= 1 && currentDay <= 5 && currentHour >= 6 && currentHour < 22) {
+            return true;
+          }
+          break;
+          
+        case '24x7':
+          return true;
+      }
+    }
+    
+    return false;
+  }
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="mfe-authorization" class="content-section">
+                        <h2>🛡️ MFE-Level Authorization</h2>
+                        
+                        <div class="authorization-implementation">
+                            <h3>Runtime Permission Checking</h3>
+                            <p>Each MFE implements authorization checks at multiple levels: component loading, feature access, and API calls.</p>
+                            
+                            <div class="authorization-levels">
+                                <div class="auth-level">
+                                    <h4>🚪 Shell-Level Authorization</h4>
+                                    <div class="level-details">
+                                        <p>Shell app determines which MFEs to load based on user permissions</p>
+                                        <pre><code class="language-typescript">// Shell App - MFE Authorization Guard
+class MFEAuthorizationGuard {
+  private entitlementService: EntitlementService;
+  private userContext: UserContextService;
+  
+  async shouldLoadMFE(mfeConfig: MFEConfig): Promise<boolean> {
+    const userTokens = await this.userContext.getCurrentTokens();
+    
+    if (!userTokens.jwt) {
+      return false;
+    }
+    
+    // Decode JWT to get user permissions
+    const tokenPayload = jwt.verify(userTokens.jwt, process.env.JWT_PUBLIC_KEY) as JWTPayload;
+    
+    // Check if user has any permissions for this MFE
+    const mfePermission = tokenPayload.mfePermissions.find(p => p.mfeId === mfeConfig.id);
+    
+    if (!mfePermission) {
+      console.warn(`User ${tokenPayload.employeeId} denied access to MFE ${mfeConfig.id}`);
+      return false;
+    }
+    
+    // Check feature flags and regional restrictions
+    if (mfeConfig.status === 'beta' && !this.isInBetaProgram(tokenPayload)) {
+      return false;
+    }
+    
+    // Regional compliance check
+    const userRegion = tokenPayload.region || await this.getUserRegion(tokenPayload.employeeId);
+    if (!mfeConfig.deployment_regions.includes(userRegion)) {
+      return false;
+    }
+    
+    return true;
+  }
+  
+  async getAuthorizedMFEConfigs(allConfigs: MFEConfig[]): Promise<MFEConfig[]> {
+    const authorizedConfigs: MFEConfig[] = [];
+    
+    for (const config of allConfigs) {
+      if (await this.shouldLoadMFE(config)) {
+        // Inject user-specific configuration
+        const customizedConfig = await this.customizeMFEConfig(config);
+        authorizedConfigs.push(customizedConfig);
+      }
+    }
+    
+    return authorizedConfigs;
+  }
+  
+  private async customizeMFEConfig(config: MFEConfig): Promise<MFEConfig> {
+    const userTokens = await this.userContext.getCurrentTokens();
+    const tokenPayload = jwt.verify(userTokens.jwt, process.env.JWT_PUBLIC_KEY) as JWTPayload;
+    
+    const mfePermission = tokenPayload.mfePermissions.find(p => p.mfeId === config.id);
+    
+    // Customize feature flags based on user permissions
+    const customizedConfig = {
+      ...config,
+      feature_flags: {
+        ...config.feature_flags,
+        // Enable features based on user permissions
+        ...this.mapPermissionsToFeatureFlags(mfePermission.features)
+      },
+      user_restrictions: mfePermission.restrictions
+    };
+    
+    return customizedConfig;
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="auth-level">
+                                    <h4>🎯 Component-Level Authorization</h4>
+                                    <div class="level-details">
+                                        <p>Individual components check permissions before rendering sensitive features</p>
+                                        <pre><code class="language-typescript">// React Hook for Permission Checking
+import { useContext, useEffect, useState } from 'react';
+import { UserContext } from '../contexts/UserContext';
+
+interface UsePermissionResult {
+  hasPermission: boolean;
+  accessLevel: 'read' | 'write' | 'admin';
+  isLoading: boolean;
+  restrictions: any;
+}
+
+export const usePermission = (
+  mfeId: string, 
+  requiredPermission: string,
+  context?: AccessContext
+): UsePermissionResult => {
+  const { userToken } = useContext(UserContext);
+  const [permissionState, setPermissionState] = useState<UsePermissionResult>({
+    hasPermission: false,
+    accessLevel: 'read',
+    isLoading: true,
+    restrictions: null
+  });
+  
+  useEffect(() => {
+    const checkPermission = async () => {
+      if (!userToken) {
+        setPermissionState({
+          hasPermission: false,
+          accessLevel: 'read',
+          isLoading: false,
+          restrictions: null
+        });
+        return;
+      }
+      
+      try {
+        const tokenPayload = jwt.decode(userToken) as JWTPayload;
+        const mfePermission = tokenPayload.mfePermissions.find(p => p.mfeId === mfeId);
+        
+        if (!mfePermission) {
+          setPermissionState(prev => ({ ...prev, hasPermission: false, isLoading: false }));
+          return;
+        }
+        
+        const hasPermission = mfePermission.permissions.includes(requiredPermission);
+        
+        // Check contextual restrictions
+        let contextuallyAllowed = true;
+        if (context && mfePermission.restrictions) {
+          contextuallyAllowed = await validateContextualAccess(
+            mfePermission.restrictions, 
+            context
+          );
+        }
+        
+        setPermissionState({
+          hasPermission: hasPermission && contextuallyAllowed,
+          accessLevel: mfePermission.accessLevel,
+          isLoading: false,
+          restrictions: mfePermission.restrictions
+        });
+        
+      } catch (error) {
+        console.error('Permission check failed:', error);
+        setPermissionState(prev => ({ ...prev, hasPermission: false, isLoading: false }));
+      }
+    };
+    
+    checkPermission();
+  }, [userToken, mfeId, requiredPermission, context]);
+  
+  return permissionState;
+};
+
+// Component Usage Example
+const TransferButton: React.FC<{ transferAmount: number }> = ({ transferAmount }) => {
+  const { hasPermission, restrictions } = usePermission(
+    'payment-transfer', 
+    'transfers.create',
+    { transactionAmount: transferAmount }
+  );
+  
+  const canInitiateTransfer = hasPermission && 
+    (!restrictions?.amount_limit || transferAmount <= restrictions.amount_limit);
+  
+  const requiresApproval = restrictions?.approval_required_above && 
+    transferAmount > restrictions.approval_required_above;
+  
+  if (!hasPermission) {
+    return null; // Don't render if no permission
+  }
+  
+  return (
+    &lt;div&gt;
+      &lt;button 
+        disabled={!canInitiateTransfer}
+        onClick={() =&gt; initiateTransfer(transferAmount, requiresApproval)}
+      &gt;
+        {requiresApproval ? 'Submit for Approval' : 'Transfer Now'}
+      &lt;/button&gt;
+      
+      {!canInitiateTransfer && (
+        &lt;div className="permission-warning"&gt;
+          Transfer amount exceeds your authorization limit of ${restrictions.amount_limit.toLocaleString()}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+};</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="auth-level">
+                                    <h4>🔗 API-Level Authorization</h4>
+                                    <div class="level-details">
+                                        <p>Backend APIs validate JWT tokens and enforce permission-based access control</p>
+                                        <pre><code class="language-typescript">// API Gateway Authorizer Function
+export const authorizerHandler = async (event: APIGatewayAuthorizerEvent): Promise<APIGatewayAuthorizerResult> => {
+  try {
+    const token = extractTokenFromHeader(event.authorizationToken);
+    
+    if (!token) {
+      throw new Error('No token provided');
+    }
+    
+    // Verify JWT signature
+    const tokenPayload = jwt.verify(token, process.env.JWT_PUBLIC_KEY) as JWTPayload;
+    
+    // Extract requested resource and action from API path
+    const { resource, action } = parseAPIPath(event.methodArn);
+    
+    // Check if user has required permission
+    const hasPermission = await checkAPIPermission(tokenPayload, resource, action);
+    
+    if (!hasPermission) {
+      return generatePolicy('user', 'Deny', event.methodArn);
+    }
+    
+    // Generate policy with user context
+    return generatePolicy('user', 'Allow', event.methodArn, {
+      userId: tokenPayload.employeeId,
+      permissions: tokenPayload.mfePermissions,
+      department: tokenPayload.department,
+      region: tokenPayload.region
+    });
+    
+  } catch (error) {
+    console.error('Authorization failed:', error);
+    return generatePolicy('user', 'Deny', event.methodArn);
+  }
+};
+
+// Permission-based API Controller
+class AccountAPIController {
+  private entitlementService: EntitlementService;
+  
+  async getAccountDetails(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    const userContext = event.requestContext.authorizer;
+    const accountId = event.pathParameters?.accountId;
+    
+    try {
+      // Check if user can access this specific account
+      const canAccess = await this.entitlementService.validateAccountAccess(
+        userContext.userId,
+        accountId,
+        'accounts.read'
+      );
+      
+      if (!canAccess) {
+        return {
+          statusCode: 403,
+          body: JSON.stringify({
+            error: 'Insufficient permissions to access this account',
+            code: 'ACCOUNT_ACCESS_DENIED'
+          })
+        };
+      }
+      
+      // Get account details with permission-based field filtering
+      const accountDetails = await this.getAccountWithPermissionFiltering(
+        accountId,
+        userContext.permissions
+      );
+      
+      return {
+        statusCode: 200,
+        body: JSON.stringify(accountDetails)
+      };
+      
+    } catch (error) {
+      console.error('Account API error:', error);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Internal server error' })
+      };
+    }
+  }
+  
+  private async getAccountWithPermissionFiltering(
+    accountId: string, 
+    userPermissions: MFEPermissions[]
+  ): Promise<any> {
+    
+    const fullAccountData = await this.accountService.getAccount(accountId);
+    
+    // Filter sensitive fields based on permissions
+    const accountPermission = userPermissions.find(p => p.mfeId === 'account-dashboard');
+    
+    if (!accountPermission) {
+      throw new Error('No account permissions found');
+    }
+    
+    const filteredAccount = {
+      accountId: fullAccountData.accountId,
+      accountNumber: fullAccountData.accountNumber,
+      balance: fullAccountData.balance,
+      accountType: fullAccountData.accountType
+    };
+    
+    // Add sensitive fields only if user has appropriate permissions
+    if (accountPermission.permissions.includes('accounts.read_sensitive')) {
+      filteredAccount.socialSecurityNumber = fullAccountData.socialSecurityNumber;
+      filteredAccount.creditScore = fullAccountData.creditScore;
+    }
+    
+    if (accountPermission.permissions.includes('accounts.read_full_history')) {
+      filteredAccount.transactionHistory = fullAccountData.transactionHistory;
+    } else {
+      // Limited transaction history
+      filteredAccount.transactionHistory = fullAccountData.transactionHistory.slice(0, 10);
+    }
+    
+    return filteredAccount;
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="token-management" class="content-section">
+                        <h2>🎫 Token Management & Security</h2>
+                        
+                        <div class="token-strategy">
+                            <h3>JWT Token Security Implementation</h3>
+                            <div class="security-measures">
+                                <div class="security-measure">
+                                    <h4>🔐 Token Encryption & Signing</h4>
+                                    <div class="measure-details">
+                                        <pre><code class="language-typescript">// JWT Token Security Configuration
+class TokenSecurityManager {
+  private privateKey: string;
+  private publicKey: string;
+  private encryptionKey: string;
+  
+  constructor() {
+    this.privateKey = this.loadFromVault('jwt-private-key');
+    this.publicKey = this.loadFromVault('jwt-public-key');
+    this.encryptionKey = this.loadFromVault('jwt-encryption-key');
+  }
+  
+  async generateSecureJWT(payload: JWTPayload): Promise<string> {
+    // Add security metadata
+    const enhancedPayload = {
+      ...payload,
+      // Security fields
+      jti: uuidv4(), // JWT ID for tracking
+      nbf: Math.floor(Date.now() / 1000), // Not before
+      aud: ['banking-mfe-platform', 'banking-api'], // Audience restriction
+      
+      // Rate limiting and session tracking
+      session_id: payload.sessionId,
+      ip_address: payload.ipAddress,
+      user_agent_hash: this.hashUserAgent(payload.userAgent),
+      
+      // Permission checksum for integrity
+      permission_hash: this.calculatePermissionHash(payload.mfePermissions)
+    };
+    
+    // Sign with RS256 (RSA + SHA256)
+    const signedToken = jwt.sign(enhancedPayload, this.privateKey, {
+      algorithm: 'RS256',
+      expiresIn: '8h',
+      issuer: 'banking-auth-service',
+      keyid: process.env.JWT_KEY_ID
+    });
+    
+    // Encrypt the entire JWT for additional security
+    const encryptedToken = await this.encryptToken(signedToken);
+    
+    return encryptedToken;
+  }
+  
+  async validateAndDecryptJWT(encryptedToken: string): Promise<JWTPayload | null> {
+    try {
+      // Decrypt the token
+      const signedToken = await this.decryptToken(encryptedToken);
+      
+      // Verify signature and decode
+      const payload = jwt.verify(signedToken, this.publicKey, {
+        algorithms: ['RS256'],
+        audience: ['banking-mfe-platform', 'banking-api'],
+        issuer: 'banking-auth-service'
+      }) as JWTPayload;
+      
+      // Validate permission integrity
+      const expectedHash = this.calculatePermissionHash(payload.mfePermissions);
+      if (payload.permission_hash !== expectedHash) {
+        throw new Error('Token permissions have been tampered with');
+      }
+      
+      // Check if token is blacklisted
+      const isBlacklisted = await this.checkTokenBlacklist(payload.jti);
+      if (isBlacklisted) {
+        throw new Error('Token has been revoked');
+      }
+      
+      return payload;
+      
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      return null;
+    }
+  }
+  
+  async revokeToken(tokenId: string, reason: string): Promise<void> {
+    // Add to blacklist
+    await this.redis.setex(
+      `blacklisted_token:${tokenId}`, 
+      8 * 60 * 60, // 8 hours (max token lifetime)
+      JSON.stringify({
+        revoked_at: new Date().toISOString(),
+        reason,
+        revoked_by: 'system'
+      })
+    );
+    
+    // Log security event
+    await this.auditLogger.logSecurityEvent({
+      event_type: 'token_revoked',
+      token_id: tokenId,
+      reason,
+      timestamp: new Date().toISOString()
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-measure">
+                                    <h4>🔄 Token Refresh & Rotation</h4>
+                                    <div class="measure-details">
+                                        <pre><code class="language-typescript">// Token Refresh Service
+class TokenRefreshService {
+  private readonly REFRESH_THRESHOLD = 30 * 60; // 30 minutes before expiry
+  private readonly MAX_REFRESH_COUNT = 10; // Maximum refreshes per session
+  
+  async handleTokenRefresh(currentToken: string): Promise<TokenRefreshResult> {
+    try {
+      const payload = await this.tokenSecurity.validateAndDecryptJWT(currentToken);
+      
+      if (!payload) {
+        throw new TokenError('Invalid token for refresh');
+      }
+      
+      // Check if token is within refresh window
+      const timeUntilExpiry = payload.exp - Math.floor(Date.now() / 1000);
+      if (timeUntilExpiry > this.REFRESH_THRESHOLD) {
+        return {
+          success: false,
+          reason: 'Token refresh not needed yet',
+          currentToken
+        };
+      }
+      
+      // Check refresh count
+      if (payload.refresh_count >= this.MAX_REFRESH_COUNT) {
+        return {
+          success: false,
+          reason: 'Maximum refresh limit reached - re-authentication required',
+          requiresReauth: true
+        };
+      }
+      
+      // Validate session is still active in ADFS
+      const adfsSessionValid = await this.validateADFSSession(payload.session_id);
+      if (!adfsSessionValid) {
+        return {
+          success: false,
+          reason: 'ADFS session expired - re-authentication required',
+          requiresReauth: true
+        };
+      }
+      
+      // Check for permission changes
+      const currentPermissions = await this.entitlementService.getUserPermissions(
+        payload.employeeId
+      );
+      
+      const permissionsChanged = this.comparePermissions(
+        payload.mfePermissions, 
+        currentPermissions
+      );
+      
+      // Generate new token with updated permissions if needed
+      const newPayload = {
+        ...payload,
+        mfePermissions: permissionsChanged ? currentPermissions : payload.mfePermissions,
+        refresh_count: (payload.refresh_count || 0) + 1,
+        refreshed_at: Math.floor(Date.now() / 1000),
+        original_iat: payload.iat, // Keep original issue time
+        exp: Math.floor(Date.now() / 1000) + (8 * 60 * 60) // New 8-hour expiry
+      };
+      
+      const newToken = await this.tokenSecurity.generateSecureJWT(newPayload);
+      
+      // Invalidate old token
+      await this.tokenSecurity.revokeToken(payload.jti, 'token_refreshed');
+      
+      return {
+        success: true,
+        newToken,
+        permissionsChanged,
+        newPermissions: permissionsChanged ? currentPermissions : undefined
+      };
+      
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return {
+        success: false,
+        reason: 'Token refresh failed',
+        requiresReauth: true
+      };
+    }
+  }
+  
+  // Proactive token refresh in shell app
+  startTokenRefreshTimer(token: string): void {
+    const payload = jwt.decode(token) as JWTPayload;
+    const timeUntilRefresh = (payload.exp - this.REFRESH_THRESHOLD) - Math.floor(Date.now() / 1000);
+    
+    if (timeUntilRefresh > 0) {
+      setTimeout(async () => {
+        const refreshResult = await this.handleTokenRefresh(token);
+        
+        if (refreshResult.success) {
+          // Update token in all MFEs
+          this.eventBus.emit('token_refreshed', {
+            newToken: refreshResult.newToken,
+            permissionsChanged: refreshResult.permissionsChanged
+          });
+          
+          // Start next refresh timer
+          this.startTokenRefreshTimer(refreshResult.newToken);
+        } else if (refreshResult.requiresReauth) {
+          // Force re-authentication
+          this.eventBus.emit('auth_required', {
+            reason: refreshResult.reason
+          });
+        }
+      }, timeUntilRefresh * 1000);
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="security-policies" class="content-section">
+                        <h2>🏛️ Centralized Policy Engine</h2>
+                        
+                        <div class="policy-engine-overview">
+                            <h3>Policy-as-Code Architecture</h3>
+                            <p>A centralized policy engine provides consistent, auditable, and maintainable access control across all MFEs and backend services. This approach separates business logic from application code and enables real-time policy updates without deployments.</p>
+                            
+                            <div class="policy-benefits">
+                                <div class="benefit-card">
+                                    <h4>🎯 Centralized Control</h4>
+                                    <p>Single source of truth for all access policies across the banking platform</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>🔄 Real-time Updates</h4>
+                                    <p>Policy changes take effect immediately without application redeployments</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>📊 Audit & Compliance</h4>
+                                    <p>Complete audit trail of policy changes and access decisions</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <h4>⚡ High Performance</h4>
+                                    <p>Sub-millisecond policy evaluation with intelligent caching</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="policy-engine-architecture">
+                            <h3>Open Policy Agent (OPA) Integration</h3>
+                            <div class="opa-implementation">
+                                <h4>Policy Engine Components</h4>
+                                <div class="component-grid">
+                                    <div class="component-card">
+                                        <h4>📜 Policy Repository</h4>
+                                        <p>Git-based policy management with version control and peer review</p>
+                                    </div>
+                                    <div class="component-card">
+                                        <h4>🚀 OPA Sidecars</h4>
+                                        <p>Co-located policy agents for zero-latency evaluation</p>
+                                    </div>
+                                    <div class="component-card">
+                                        <h4>🔄 Policy Distribution</h4>
+                                        <p>Automated policy deployment and cache invalidation</p>
+                                    </div>
+                                    <div class="component-card">
+                                        <h4>📈 Decision Logging</h4>
+                                        <p>Comprehensive logging for audit and analytics</p>
+                                    </div>
+                                </div>
+                                
+                                <h4>Banking Entitlement Policies (Rego)</h4>
+                                <pre><code class="language-rego"># Banking entitlement policies in Rego language
+package banking.entitlements
+
+import rego.v1
+
+# Main entitlement decision point
+allow if {
+    user := input.user
+    resource := input.resource
+    action := input.action
+    context := input.context
+    
+    # Check if user is authenticated
+    user.authenticated == true
+    
+    # Evaluate based on resource type
+    resource_allowed(user, resource, action, context)
+}
+
+# MFE-specific access control
+resource_allowed(user, resource, action, context) if {
+    resource.type == "mfe"
+    mfe_access_granted(user, resource, action, context)
+}
+
+# Account access control
+resource_allowed(user, resource, action, context) if {
+    resource.type == "account"
+    account_access_granted(user, resource, action, context)
+}
+
+# Transaction access control
+resource_allowed(user, resource, action, context) if {
+    resource.type == "transaction"
+    transaction_access_granted(user, resource, action, context)
+}
+
+# MFE Access Rules
+mfe_access_granted(user, resource, action, context) if {
+    # Get user groups from ADFS claims
+    user_groups := user.adfs_groups
+    
+    # Check if user has required MFE permission
+    required_permission := mfe_permissions[resource.mfe_id][action]
+    
+    # Evaluate group-based permissions
+    some group in user_groups
+    group_permissions := group_mappings[group].mfe_permissions
+    
+    some permission in group_permissions
+    permission.mfeId == resource.mfe_id
+    required_permission in permission.permissions
+    
+    # Apply contextual restrictions
+    contextual_restrictions_met(user, permission, context)
+}
+
+# Contextual restriction evaluation
+contextual_restrictions_met(user, permission, context) if {
+    restrictions := permission.restrictions
+    
+    # Time-based restrictions
+    time_restrictions_met(restrictions.time_restrictions, context.current_time)
+    
+    # Amount-based restrictions
+    amount_restrictions_met(restrictions, context)
+    
+    # Regional restrictions
+    regional_restrictions_met(user, restrictions, context)
+    
+    # Customer segment restrictions
+    segment_restrictions_met(restrictions, context)
+}
+
+# Time restriction rules
+time_restrictions_met(time_restrictions, current_time) if {
+    count(time_restrictions) == 0  # No time restrictions
+}
+
+time_restrictions_met(time_restrictions, current_time) if {
+    "24x7" in time_restrictions
+}
+
+time_restrictions_met(time_restrictions, current_time) if {
+    "business_hours" in time_restrictions
+    is_business_hours(current_time)
+}
+
+is_business_hours(current_time) if {
+    hour := time.clock(current_time)[0]
+    weekday := time.weekday(current_time)
+    
+    # Monday-Friday, 8 AM - 6 PM
+    weekday >= 1
+    weekday <= 5
+    hour >= 8
+    hour < 18
+}
+
+# Amount restriction rules
+amount_restrictions_met(restrictions, context) if {
+    not restrictions.amount_limit  # No amount limit
+}
+
+amount_restrictions_met(restrictions, context) if {
+    restrictions.amount_limit
+    context.transaction_amount <= restrictions.amount_limit
+}
+
+# Regional compliance rules
+regional_restrictions_met(user, restrictions, context) if {
+    user_region := user.region
+    allowed_regions := restrictions.allowed_regions
+    
+    count(allowed_regions) == 0  # No regional restrictions
+}
+
+regional_restrictions_met(user, restrictions, context) if {
+    user_region := user.region
+    allowed_regions := restrictions.allowed_regions
+    
+    user_region in allowed_regions
+}
+
+# Customer segment restrictions
+segment_restrictions_met(restrictions, context) if {
+    not restrictions.customer_segment  # No segment restrictions
+}
+
+segment_restrictions_met(restrictions, context) if {
+    restrictions.customer_segment
+    context.customer.segment in restrictions.customer_segment
+}
+
+# Account access rules with customer relationship validation
+account_access_granted(user, resource, action, context) if {
+    # Basic permission check
+    user_has_account_permission(user, action)
+    
+    # Customer relationship validation
+    customer_relationship_valid(user, resource.account_id, context)
+    
+    # Regulatory compliance check
+    regulatory_compliance_met(user, resource, action, context)
+}
+
+user_has_account_permission(user, action) if {
+    some group in user.adfs_groups
+    permissions := group_mappings[group].account_permissions
+    action in permissions
+}
+
+customer_relationship_valid(user, account_id, context) if {
+    # Customer service reps can access assigned customers
+    user.job_title == "Customer Service Representative"
+    account_id in user.assigned_customers
+}
+
+customer_relationship_valid(user, account_id, context) if {
+    # Account owners can access their own accounts
+    user.employee_id in context.account.authorized_users
+}
+
+customer_relationship_valid(user, account_id, context) if {
+    # Managers can access accounts within their region/branch
+    user.job_title == "Manager"
+    context.account.branch == user.branch
+}
+
+# Transaction approval workflow rules
+transaction_approval_required(user, transaction, context) if {
+    transaction.amount > user.approval_limit
+}
+
+transaction_approval_required(user, transaction, context) if {
+    transaction.type in ["wire_transfer", "international_transfer"]
+    not user.international_transfer_authorized
+}
+
+# Compliance and regulatory rules
+regulatory_compliance_met(user, resource, action, context) if {
+    # GDPR compliance for EU customers
+    gdpr_compliant(user, resource, context)
+    
+    # SOX compliance for financial reporting
+    sox_compliant(user, resource, action, context)
+    
+    # PCI DSS compliance for payment data
+    pci_compliant(user, resource, action, context)
+}
+
+gdpr_compliant(user, resource, context) if {
+    # EU customers require explicit consent for data processing
+    not context.customer.region == "EU"
+}
+
+gdpr_compliant(user, resource, context) if {
+    context.customer.region == "EU"
+    context.customer.gdpr_consent == true
+    user.gdpr_training_completed == true
+}
+
+# Data classification and access control
+data_classification_check(user, resource, action) if {
+    classification := resource.data_classification
+    
+    # Public data - no restrictions
+    classification == "public"
+}
+
+data_classification_check(user, resource, action) if {
+    classification := resource.data_classification
+    user_clearance := user.security_clearance
+    
+    # Internal data - requires employee access
+    classification == "internal"
+    user_clearance in ["internal", "confidential", "restricted"]
+}
+
+data_classification_check(user, resource, action) if {
+    classification := resource.data_classification
+    user_clearance := user.security_clearance
+    
+    # Confidential data - requires higher clearance
+    classification == "confidential"
+    user_clearance in ["confidential", "restricted"]
+}
+
+data_classification_check(user, resource, action) if {
+    classification := resource.data_classification
+    
+    # Restricted data - requires explicit authorization
+    classification == "restricted"
+    user.restricted_data_access == true
+}
+
+# Policy data and mappings
+group_mappings := {
+    "Banking_Tellers": {
+        "mfe_permissions": [
+            {
+                "mfeId": "customer-lookup",
+                "permissions": ["customers.read", "accounts.read"],
+                "restrictions": {
+                    "time_restrictions": ["business_hours"],
+                    "amount_limit": 10000,
+                    "customer_segment": ["retail"]
+                }
+            }
+        ],
+        "account_permissions": ["accounts.read"],
+        "approval_limit": 5000
+    },
+    "Banking_Managers": {
+        "mfe_permissions": [
+            {
+                "mfeId": "management-dashboard",
+                "permissions": ["teams.read", "approvals.write", "reports.generate"],
+                "restrictions": {
+                    "time_restrictions": ["24x7"],
+                    "amount_limit": 100000
+                }
+            }
+        ],
+        "account_permissions": ["accounts.read", "accounts.write"],
+        "approval_limit": 100000
+    }
+}
+
+mfe_permissions := {
+    "customer-lookup": {
+        "read": "customers.read",
+        "search": "customers.search"
+    },
+    "transaction-processing": {
+        "create": "transactions.create",
+        "approve": "transactions.approve"
+    },
+    "management-dashboard": {
+        "view": "reports.read",
+        "export": "reports.export"
+    }
+}</code></pre>
+                                
+                                <h4>Policy Engine Service Implementation</h4>
+                                <pre><code class="language-typescript">// Policy Engine Service with OPA Integration
+import { OpenPolicyAgent } from '@open-policy-agent/opa-wasm';
+
+interface PolicyDecisionRequest {
+  user: UserContext;
+  resource: ResourceContext;
+  action: string;
+  context: AccessContext;
+}
+
+interface PolicyDecisionResponse {
+  allow: boolean;
+  reasons: string[];
+  obligations: string[];
+  advice: string[];
+  decision_id: string;
+}
+
+class CentralizedPolicyEngine {
+  private opaInstances: Map<string, OpenPolicyAgent> = new Map();
+  private policyCache: Map<string, any> = new Map();
+  private decisionLogger: DecisionLogger;
+  private metricsCollector: MetricsCollector;
+  
+  constructor() {
+    this.decisionLogger = new DecisionLogger();
+    this.metricsCollector = new MetricsCollector();
+    this.initializeOPAInstances();
+  }
+  
+  async evaluatePolicy(request: PolicyDecisionRequest): Promise<PolicyDecisionResponse> {
+    const startTime = Date.now();
+    const decisionId = this.generateDecisionId();
+    
+    try {
+      // Get appropriate OPA instance (shard by user region for performance)
+      const opaInstance = this.getOPAInstance(request.user.region);
+      
+      // Prepare input for OPA evaluation
+      const input = {
+        user: {
+          authenticated: true,
+          employee_id: request.user.employeeId,
+          adfs_groups: request.user.adfsGroups,
+          job_title: request.user.jobTitle,
+          department: request.user.department,
+          region: request.user.region,
+          branch: request.user.branch,
+          security_clearance: request.user.securityClearance || 'internal',
+          approval_limit: this.getUserApprovalLimit(request.user),
+          gdpr_training_completed: request.user.gdprTrainingCompleted || false,
+          restricted_data_access: request.user.restrictedDataAccess || false,
+          assigned_customers: request.user.assignedCustomers || []
+        },
+        resource: {
+          type: request.resource.type,
+          mfe_id: request.resource.mfeId,
+          account_id: request.resource.accountId,
+          data_classification: request.resource.dataClassification || 'internal'
+        },
+        action: request.action,
+        context: {
+          current_time: new Date().toISOString(),
+          transaction_amount: request.context.transactionAmount,
+          customer: request.context.customer,
+          account: request.context.account,
+          ip_address: request.context.ipAddress,
+          user_agent: request.context.userAgent
+        }
+      };
+      
+      // Evaluate policy with OPA
+      const result = await opaInstance.evaluate('banking/entitlements/allow', input);
+      
+      // Get additional policy information
+      const reasons = await opaInstance.evaluate('banking/entitlements/reasons', input);
+      const obligations = await opaInstance.evaluate('banking/entitlements/obligations', input);
+      
+      const decision: PolicyDecisionResponse = {
+        allow: result || false,
+        reasons: reasons || [],
+        obligations: obligations || [],
+        advice: [],
+        decision_id: decisionId
+      };
+      
+      // Log decision for audit purposes
+      await this.logPolicyDecision(request, decision, Date.now() - startTime);
+      
+      // Collect metrics
+      this.metricsCollector.recordDecision(decision.allow, Date.now() - startTime, request.user.region);
+      
+      return decision;
+      
+    } catch (error) {
+      console.error('Policy evaluation failed:', error);
+      
+      // Log the error
+      await this.logPolicyError(request, error, decisionId);
+      
+      // Fail-safe: deny access on policy evaluation error
+      return {
+        allow: false,
+        reasons: ['Policy evaluation error'],
+        obligations: [],
+        advice: ['Contact system administrator'],
+        decision_id: decisionId
+      };
+    }
+  }
+  
+  async bulkEvaluatePolicy(requests: PolicyDecisionRequest[]): Promise<PolicyDecisionResponse[]> {
+    // Process requests in parallel, grouped by region for efficiency
+    const requestsByRegion = this.groupRequestsByRegion(requests);
+    const promises: Promise<PolicyDecisionResponse[]>[] = [];
+    
+    for (const [region, regionRequests] of requestsByRegion) {
+      promises.push(this.evaluateRegionRequests(region, regionRequests));
+    }
+    
+    const results = await Promise.all(promises);
+    return results.flat();
+  }
+  
+  async refreshPolicyCache(): Promise<void> {
+    try {
+      // Fetch latest policies from Git repository
+      const latestPolicies = await this.fetchLatestPolicies();
+      
+      // Update each OPA instance
+      for (const [region, opaInstance] of this.opaInstances) {
+        await opaInstance.loadPolicy(latestPolicies);
+      }
+      
+      // Clear local cache
+      this.policyCache.clear();
+      
+      console.log('Policy cache refreshed successfully');
+      
+    } catch (error) {
+      console.error('Failed to refresh policy cache:', error);
+      throw error;
+    }
+  }
+  
+  private async logPolicyDecision(
+    request: PolicyDecisionRequest, 
+    decision: PolicyDecisionResponse, 
+    executionTime: number
+  ): Promise<void> {
+    
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      decision_id: decision.decision_id,
+      user_id: request.user.employeeId,
+      resource_type: request.resource.type,
+      resource_id: request.resource.mfeId || request.resource.accountId,
+      action: request.action,
+      decision: decision.allow,
+      reasons: decision.reasons,
+      execution_time_ms: executionTime,
+      user_context: {
+        department: request.user.department,
+        region: request.user.region,
+        adfs_groups: request.user.adfsGroups
+      },
+      request_context: {
+        ip_address: request.context.ipAddress,
+        user_agent_hash: this.hashUserAgent(request.context.userAgent)
+      }
+    };
+    
+    // Log to multiple destinations for redundancy
+    await Promise.all([
+      this.decisionLogger.logToCloudWatch(logEntry),
+      this.decisionLogger.logToS3(logEntry),
+      this.decisionLogger.logToAuditDB(logEntry)
+    ]);
+  }
+}</code></pre>
+                                
+                                <h4>Policy Management & Deployment</h4>
+                                <pre><code class="language-typescript">// Policy Management System
+class PolicyManagementSystem {
+  private gitRepository: GitRepository;
+  private cicdPipeline: CICDPipeline;
+  private policyEngine: CentralizedPolicyEngine;
+  
+  constructor() {
+    this.gitRepository = new GitRepository(process.env.POLICY_REPO_URL);
+    this.cicdPipeline = new CICDPipeline();
+    this.policyEngine = new CentralizedPolicyEngine();
+  }
+  
+  async createPolicyChangeRequest(
+    policyChanges: PolicyChange[], 
+    author: string, 
+    justification: string
+  ): Promise<PolicyChangeRequest> {
+    
+    // Create feature branch
+    const branchName = `policy-change-${Date.now()}`;
+    await this.gitRepository.createBranch(branchName);
+    
+    // Apply policy changes
+    for (const change of policyChanges) {
+      await this.applyPolicyChange(change, branchName);
+    }
+    
+    // Validate changes
+    const validationResult = await this.validatePolicyChanges(branchName);
+    
+    if (!validationResult.valid) {
+      throw new PolicyValidationError('Policy changes failed validation', validationResult);
+    }
+    
+    // Create pull request
+    const pullRequest = await this.gitRepository.createPullRequest({
+      branch: branchName,
+      title: `Policy Changes: ${policyChanges.map(c => c.name).join(', ')}`,
+      description: justification,
+      author,
+      reviewers: this.getPolicyReviewers(policyChanges)
+    });
+    
+    return {
+      id: pullRequest.id,
+      branch: branchName,
+      changes: policyChanges,
+      validation: validationResult,
+      status: 'pending_review'
+    };
+  }
+  
+  async deployPolicyChanges(changeRequestId: string): Promise<DeploymentResult> {
+    try {
+      // Get approved change request
+      const changeRequest = await this.getChangeRequest(changeRequestId);
+      
+      if (changeRequest.status !== 'approved') {
+        throw new Error('Change request must be approved before deployment');
+      }
+      
+      // Build policy bundle
+      const policyBundle = await this.buildPolicyBundle(changeRequest.branch);
+      
+      // Deploy to staging environment first
+      await this.deployToStaging(policyBundle);
+      
+      // Run integration tests
+      const testResults = await this.runIntegrationTests(policyBundle);
+      
+      if (!testResults.passed) {
+        throw new Error('Integration tests failed');
+      }
+      
+      // Deploy to production with blue-green deployment
+      await this.deployToProduction(policyBundle);
+      
+      // Merge to main branch
+      await this.gitRepository.mergePullRequest(changeRequest.pullRequestId);
+      
+      return {
+        success: true,
+        deploymentId: `policy-deploy-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        changes: changeRequest.changes
+      };
+      
+    } catch (error) {
+      console.error('Policy deployment failed:', error);
+      return {
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="audit-compliance" class="content-section">
+                        <h2>📊 Audit & Compliance Framework</h2>
+                        
+                        <div class="audit-architecture">
+                            <h3>Comprehensive Audit Trail</h3>
+                            <p>Every access decision, policy change, and user action is logged with complete context for regulatory compliance and security analysis.</p>
+                            
+                            <div class="audit-streams">
+                                <div class="audit-stream">
+                                    <h4>🔐 Authentication Events</h4>
+                                    <ul>
+                                        <li>ADFS authentication attempts</li>
+                                        <li>Token generation and refresh</li>
+                                        <li>Session establishment and termination</li>
+                                        <li>Failed authentication attempts</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="audit-stream">
+                                    <h4>🎯 Authorization Decisions</h4>
+                                    <ul>
+                                        <li>Policy evaluation results</li>
+                                        <li>MFE access grants/denials</li>
+                                        <li>Feature-level permission checks</li>
+                                        <li>Resource access attempts</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="audit-stream">
+                                    <h4>💼 Business Operations</h4>
+                                    <ul>
+                                        <li>Transaction processing</li>
+                                        <li>Account modifications</li>
+                                        <li>Customer data access</li>
+                                        <li>Report generation</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="audit-stream">
+                                    <h4>⚙️ System Changes</h4>
+                                    <ul>
+                                        <li>Policy modifications</li>
+                                        <li>Configuration updates</li>
+                                        <li>User permission changes</li>
+                                        <li>System maintenance events</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <h4>Real-time Audit Processing</h4>
+                            <pre><code class="language-typescript">// Comprehensive Audit System
+class BankingAuditSystem {
+  private auditStreams: Map<string, AuditStream> = new Map();
+  private complianceRules: ComplianceRuleEngine;
+  private alerting: SecurityAlertSystem;
+  
+  constructor() {
+    this.initializeAuditStreams();
+    this.complianceRules = new ComplianceRuleEngine();
+    this.alerting = new SecurityAlertSystem();
+  }
+  
+  async logSecurityEvent(event: SecurityEvent): Promise<void> {
+    const enrichedEvent = await this.enrichEvent(event);
+    
+    // Log to multiple streams for redundancy
+    await Promise.all([
+      this.logToCloudWatch(enrichedEvent),
+      this.logToSecurityLake(enrichedEvent),
+      this.logToSIEM(enrichedEvent),
+      this.logToComplianceDB(enrichedEvent)
+    ]);
+    
+    // Real-time compliance checking
+    await this.evaluateComplianceRules(enrichedEvent);
+    
+    // Anomaly detection
+    await this.detectAnomalies(enrichedEvent);
+  }
+  
+  private async enrichEvent(event: SecurityEvent): Promise<EnrichedSecurityEvent> {
+    return {
+      ...event,
+      // Add contextual information
+      timestamp: new Date().toISOString(),
+      event_id: uuidv4(),
+      correlation_id: event.correlationId || uuidv4(),
+      
+      // User context enrichment
+      user_context: await this.getUserContext(event.userId),
+      
+      // Geolocation and device fingerprinting
+      geolocation: await this.getGeolocation(event.ipAddress),
+      device_fingerprint: await this.getDeviceFingerprint(event.userAgent),
+      
+      // Risk scoring
+      risk_score: await this.calculateRiskScore(event),
+      
+      // Compliance tags
+      compliance_tags: this.getComplianceTags(event),
+      
+      // Data classification
+      data_classification: await this.classifyEventData(event)
+    };
+  }
+  
+  async generateComplianceReport(
+    reportType: 'SOX' | 'GDPR' | 'PCI_DSS' | 'FFIEC',
+    startDate: Date,
+    endDate: Date,
+    filters?: ReportFilters
+  ): Promise<ComplianceReport> {
+    
+    const queryBuilder = new AuditQueryBuilder()
+      .timeRange(startDate, endDate)
+      .complianceType(reportType);
+    
+    if (filters) {
+      queryBuilder.applyFilters(filters);
+    }
+    
+    const auditEvents = await this.queryAuditEvents(queryBuilder.build());
+    
+    // Generate compliance-specific report
+    switch (reportType) {
+      case 'SOX':
+        return this.generateSOXReport(auditEvents);
+      case 'GDPR':
+        return this.generateGDPRReport(auditEvents);
+      case 'PCI_DSS':
+        return this.generatePCIReport(auditEvents);
+      case 'FFIEC':
+        return this.generateFFIECReport(auditEvents);
+    }
+  }
+  
+  private async generateSOXReport(events: AuditEvent[]): Promise<SOXComplianceReport> {
+    return {
+      report_id: uuidv4(),
+      report_type: 'SOX',
+      generation_date: new Date().toISOString(),
+      
+      // SOX Section 404 - Internal Controls
+      internal_controls: {
+        access_controls: await this.analyzeAccessControls(events),
+        segregation_of_duties: await this.analyzeSoD(events),
+        change_management: await this.analyzeChangeManagement(events),
+        data_integrity: await this.analyzeDataIntegrity(events)
+      },
+      
+      // Control deficiencies and exceptions
+      control_deficiencies: await this.identifyControlDeficiencies(events),
+      
+      // Management assertions
+      management_assertions: {
+        design_effectiveness: await this.assessDesignEffectiveness(events),
+        operating_effectiveness: await this.assessOperatingEffectiveness(events)
+      },
+      
+      // Supporting evidence
+      supporting_evidence: await this.collectSupportingEvidence(events),
+      
+      // Summary and recommendations
+      executive_summary: await this.generateExecutiveSummary(events, 'SOX')
+    };
+  }
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <section id="fault-tolerance" class="content-section">
+                        <h2>🛡️ Fault Tolerance & Resilience</h2>
+                        
+                        <div class="resilience-patterns">
+                            <h3>Multi-Layer Resilience Strategy</h3>
+                            <p>Banking systems require exceptional resilience with multiple layers of fault tolerance to ensure continuous operation during failures.</p>
+                            
+                            <div class="resilience-layers">
+                                <div class="resilience-layer">
+                                    <h4>🌐 Network Resilience</h4>
+                                    <div class="layer-details">
+                                        <ul>
+                                            <li><strong>Multi-region deployment</strong> with automatic failover</li>
+                                            <li><strong>Circuit breakers</strong> to prevent cascade failures</li>
+                                            <li><strong>Retry mechanisms</strong> with exponential backoff</li>
+                                            <li><strong>Timeout handling</strong> with graceful degradation</li>
+                                        </ul>
+                                        
+                                        <pre><code class="language-typescript">// Circuit Breaker Pattern for Banking Services
+class BankingCircuitBreaker {
+  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private failureCount = 0;
+  private successCount = 0;
+  private lastFailureTime = 0;
+  
+  constructor(
+    private threshold: number = 5,
+    private timeout: number = 60000,
+    private monitoringWindow: number = 120000
+  ) {}
+  
+  async call<T>(operation: () => Promise<T>, fallback?: () => Promise<T>): Promise<T> {
+    if (this.state === 'OPEN') {
+      if (Date.now() - this.lastFailureTime < this.timeout) {
+        if (fallback) {
+          return await fallback();
+        }
+        throw new Error('Circuit breaker is OPEN');
+      } else {
+        this.state = 'HALF_OPEN';
+        this.successCount = 0;
+      }
+    }
+    
+    try {
+      const result = await operation();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      if (fallback) {
+        return await fallback();
+      }
+      throw error;
+    }
+  }
+  
+  private onSuccess(): void {
+    this.failureCount = 0;
+    
+    if (this.state === 'HALF_OPEN') {
+      this.successCount++;
+      if (this.successCount >= 3) {
+        this.state = 'CLOSED';
+      }
+    }
+  }
+  
+  private onFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    
+    if (this.failureCount >= this.threshold) {
+      this.state = 'OPEN';
+    }
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="resilience-layer">
+                                    <h4>💾 Data Resilience</h4>
+                                    <div class="layer-details">
+                                        <ul>
+                                            <li><strong>Multi-AZ database replication</strong> with automatic failover</li>
+                                            <li><strong>Point-in-time recovery</strong> with continuous backups</li>
+                                            <li><strong>Cross-region data replication</strong> for disaster recovery</li>
+                                            <li><strong>Data validation</strong> and consistency checks</li>
+                                        </ul>
+                                        
+                                        <pre><code class="language-typescript">// Data Resilience Service
+class DataResilienceService {
+  private primaryDB: Database;
+  private replicaDBs: Database[];
+  private backupService: BackupService;
+  
+  async executeTransaction(transaction: BankingTransaction): Promise<TransactionResult> {
+    const transactionId = uuidv4();
+    
+    try {
+      // Begin distributed transaction
+      const distributedTx = await this.beginDistributedTransaction(transactionId);
+      
+      // Execute on primary with validation
+      const primaryResult = await this.executeOnPrimary(transaction, distributedTx);
+      
+      // Replicate to secondaries
+      await this.replicateToSecondaries(transaction, distributedTx);
+      
+      // Commit distributed transaction
+      await this.commitDistributedTransaction(distributedTx);
+      
+      return primaryResult;
+      
+    } catch (error) {
+      // Rollback on failure
+      await this.rollbackDistributedTransaction(transactionId);
+      
+      // Log the failure for investigation
+      await this.logTransactionFailure(transaction, error);
+      
+      throw new TransactionError('Transaction failed', error);
+    }
+  }
+  
+  async handleDatabaseFailover(): Promise<void> {
+    // Detect primary database failure
+    const healthyReplica = await this.findHealthyReplica();
+    
+    if (!healthyReplica) {
+      throw new Error('No healthy database replicas available');
+    }
+    
+    // Promote replica to primary
+    await this.promoteReplicaToPrimary(healthyReplica);
+    
+    // Update connection strings
+    await this.updateConnectionStrings(healthyReplica);
+    
+    // Notify applications of the failover
+    await this.notifyApplications('database_failover', {
+      new_primary: healthyReplica.endpoint,
+      failover_time: new Date().toISOString()
+    });
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="next-steps">
+                        <h2>Next: Performance & Scalability</h2>
+                        <div class="next-buttons">
+                            <a href="performance.html" class="btn btn-primary">Performance & Scale →</a>
+                            <a href="ai-integration.html" class="btn btn-secondary">AI Integration →</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Banking UI Architecture - Technical Presentation</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

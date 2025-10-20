@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scalable UI Architecture for Global Banking - Technical Presentation</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>Banking UI Architecture</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link active">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/micro-frontends.html" class="nav-link">Micro Frontends</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/aws-architecture.html" class="nav-link">AWS Infrastructure</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/performance.html" class="nav-link">Performance & Scale</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/resilience.html" class="nav-link">Resilience & Security</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/ai-integration.html" class="nav-link">AI Integration</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Scalable UI Architecture for Global Banking</h1>
+                    <p class="hero-subtitle">Enterprise-grade micro frontend architecture designed for 2x YoY growth</p>
+                    <div class="presentation-meta">
+                        <span><i class="fas fa-user"></i> Lead Software Engineer</span>
+                        <span><i class="fas fa-calendar"></i> Expert Engineer Program</span>
+                        <span><i class="fas fa-chart-line"></i> Scalability Focus</span>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">2x</div>
+                        <div class="stat-label">YoY Growth Target</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">99.99%</div>
+                        <div class="stat-label">Uptime SLA</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">&lt;100ms</div>
+                        <div class="stat-label">Response Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">Global</div>
+                        <div class="stat-label">Multi-Region</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="executive-summary">
+            <div class="container">
+                <h2>Executive Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <h3>Micro Frontend Strategy</h3>
+                        <p>Decompose monolithic banking UI into independent, deployable micro frontends with domain-driven boundaries for accounts, payments, investments, and compliance.</p>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Entitlement Framework</h3>
+                        <p>Policy-driven access control using AWS IAM and custom entitlement service to dynamically load MFEs based on user roles, geography, and compliance requirements.</p>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h3>API Gateway Strategy</h3>
+                        <p>Centralized proxy service using AWS API Gateway with rate limiting, authentication, and intelligent routing to microservices across multiple AWS regions.</p>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h3>Performance Engineering</h3>
+                        <p>Multi-layer caching strategy using CloudFront, ElastiCache, and intelligent prefetching to achieve sub-100ms response times globally.</p>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI-Driven Optimization</h3>
+                        <p>Machine learning powered dynamic loading, predictive caching, and real-time performance optimization using AWS Personalize and CloudWatch ML.</p>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3>Global Resilience</h3>
+                        <p>Multi-region deployment with active-active failover, circuit breakers, and graceful degradation to ensure 99.99% uptime SLA.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="architecture-overview">
+            <div class="container">
+                <h2>High-Level Architecture Overview</h2>
+                <div class="architecture-diagram">
+                    <div class="diagram-container">
+                        <div class="layer layer-cdn">
+                            <h4>CDN Layer (CloudFront)</h4>
+                            <div class="components">
+                                <div class="component">Static Assets</div>
+                                <div class="component">MFE Bundles</div>
+                                <div class="component">Edge Caching</div>
+                            </div>
+                        </div>
+                        
+                        <div class="layer layer-gateway">
+                            <h4>API Gateway Layer</h4>
+                            <div class="components">
+                                <div class="component">Authentication</div>
+                                <div class="component">Rate Limiting</div>
+                                <div class="component">Request Routing</div>
+                            </div>
+                        </div>
+                        
+                        <div class="layer layer-application">
+                            <h4>Application Layer</h4>
+                            <div class="mfe-grid">
+                                <div class="mfe-item">Shell App (Container)</div>
+                                <div class="mfe-item">Accounts MFE</div>
+                                <div class="mfe-item">Payments MFE</div>
+                                <div class="mfe-item">Investments MFE</div>
+                                <div class="mfe-item">Compliance MFE</div>
+                                <div class="mfe-item">Analytics MFE</div>
+                            </div>
+                        </div>
+                        
+                        <div class="layer layer-services">
+                            <h4>Microservices Layer</h4>
+                            <div class="components">
+                                <div class="component">Account Service</div>
+                                <div class="component">Payment Service</div>
+                                <div class="component">Risk Service</div>
+                                <div class="component">Notification Service</div>
+                            </div>
+                        </div>
+                        
+                        <div class="layer layer-data">
+                            <h4>Data Layer</h4>
+                            <div class="components">
+                                <div class="component">RDS Clusters</div>
+                                <div class="component">DynamoDB</div>
+                                <div class="component">ElastiCache</div>
+                                <div class="component">S3 Data Lake</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="key-benefits">
+            <div class="container">
+                <h2>Strategic Benefits</h2>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <div class="benefit-header">
+                            <i class="fas fa-rocket"></i>
+                            <h3>Scalability</h3>
+                        </div>
+                        <ul>
+                            <li>Independent scaling of MFEs based on usage patterns</li>
+                            <li>Auto-scaling groups with predictive scaling</li>
+                            <li>Regional load distribution for global performance</li>
+                            <li>Elastic infrastructure that grows with traffic</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-header">
+                            <i class="fas fa-users"></i>
+                            <h3>Team Autonomy</h3>
+                        </div>
+                        <ul>
+                            <li>Independent development and deployment cycles</li>
+                            <li>Technology stack freedom per domain</li>
+                            <li>Reduced coordination overhead between teams</li>
+                            <li>Faster feature delivery and innovation</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Risk Mitigation</h3>
+                        </div>
+                        <ul>
+                            <li>Fault isolation prevents cascade failures</li>
+                            <li>Gradual rollouts with feature flags</li>
+                            <li>A/B testing at MFE level</li>
+                            <li>Rollback capabilities per micro frontend</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-header">
+                            <i class="fas fa-dollar-sign"></i>
+                            <h3>Cost Optimization</h3>
+                        </div>
+                        <ul>
+                            <li>Pay-per-use serverless architecture</li>
+                            <li>Intelligent caching reduces API calls</li>
+                            <li>Resource optimization based on usage patterns</li>
+                            <li>Reduced infrastructure waste through right-sizing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="technical-decisions">
+            <div class="container">
+                <h2>Key Technical Decisions</h2>
+                <div class="decisions-timeline">
+                    <div class="decision-item">
+                        <div class="decision-number">1</div>
+                        <div class="decision-content">
+                            <h3>Module Federation Strategy</h3>
+                            <p><strong>Decision:</strong> Use Webpack 5 Module Federation for MFE orchestration</p>
+                            <p><strong>Rationale:</strong> Runtime composition, shared dependencies, type safety</p>
+                            <div class="tech-stack">
+                                <span class="tech-tag">Webpack 5</span>
+                                <span class="tech-tag">React 18</span>
+                                <span class="tech-tag">TypeScript</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="decision-item">
+                        <div class="decision-number">2</div>
+                        <div class="decision-content">
+                            <h3>State Management</h3>
+                            <p><strong>Decision:</strong> Event-driven architecture with Redux Toolkit Query</p>
+                            <p><strong>Rationale:</strong> Loose coupling, caching, optimistic updates</p>
+                            <div class="tech-stack">
+                                <span class="tech-tag">Redux Toolkit</span>
+                                <span class="tech-tag">Event Bus</span>
+                                <span class="tech-tag">WebSockets</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="decision-item">
+                        <div class="decision-number">3</div>
+                        <div class="decision-content">
+                            <h3>Authentication Strategy</h3>
+                            <p><strong>Decision:</strong> OAuth 2.0 + OIDC with AWS Cognito</p>
+                            <p><strong>Rationale:</strong> Industry standard, fine-grained permissions, compliance</p>
+                            <div class="tech-stack">
+                                <span class="tech-tag">AWS Cognito</span>
+                                <span class="tech-tag">JWT</span>
+                                <span class="tech-tag">RBAC</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="decision-item">
+                        <div class="decision-number">4</div>
+                        <div class="decision-content">
+                            <h3>Deployment Strategy</h3>
+                            <p><strong>Decision:</strong> Blue-Green deployment with AWS CodeDeploy</p>
+                            <p><strong>Rationale:</strong> Zero-downtime deployments, quick rollbacks, safety</p>
+                            <div class="tech-stack">
+                                <span class="tech-tag">AWS ECS</span>
+                                <span class="tech-tag">CodeDeploy</span>
+                                <span class="tech-tag">ALB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="implementation-phases">
+            <div class="container">
+                <h2>Implementation Roadmap</h2>
+                <div class="phases-container">
+                    <div class="phase">
+                        <div class="phase-header">
+                            <h3>Phase 1: Foundation</h3>
+                            <span class="phase-duration">Months 1-3</span>
+                        </div>
+                        <div class="phase-content">
+                            <h4>Infrastructure Setup</h4>
+                            <ul>
+                                <li>AWS multi-region infrastructure provisioning</li>
+                                <li>API Gateway and Lambda setup</li>
+                                <li>CloudFront CDN configuration</li>
+                                <li>Monitoring and logging infrastructure</li>
+                            </ul>
+                            <h4>Core Shell Application</h4>
+                            <ul>
+                                <li>Module federation configuration</li>
+                                <li>Authentication and authorization</li>
+                                <li>Navigation and routing framework</li>
+                                <li>Design system and shared components</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="phase">
+                        <div class="phase-header">
+                            <h3>Phase 2: Core MFEs</h3>
+                            <span class="phase-duration">Months 4-8</span>
+                        </div>
+                        <div class="phase-content">
+                            <h4>Priority Micro Frontends</h4>
+                            <ul>
+                                <li>Accounts Management MFE</li>
+                                <li>Payments and Transfers MFE</li>
+                                <li>Transaction History MFE</li>
+                                <li>User Profile and Settings MFE</li>
+                            </ul>
+                            <h4>Integration Layer</h4>
+                            <ul>
+                                <li>Event bus implementation</li>
+                                <li>Shared state management</li>
+                                <li>Cross-MFE communication patterns</li>
+                                <li>Performance monitoring setup</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="phase">
+                        <div class="phase-header">
+                            <h3>Phase 3: Advanced Features</h3>
+                            <span class="phase-duration">Months 9-12</span>
+                        </div>
+                        <div class="phase-content">
+                            <h4>Specialized MFEs</h4>
+                            <ul>
+                                <li>Investment Portfolio MFE</li>
+                                <li>Compliance and Reporting MFE</li>
+                                <li>Analytics Dashboard MFE</li>
+                                <li>Customer Support MFE</li>
+                            </ul>
+                            <h4>AI Integration</h4>
+                            <ul>
+                                <li>Predictive loading implementation</li>
+                                <li>Personalization engine</li>
+                                <li>Intelligent caching strategies</li>
+                                <li>Real-time performance optimization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="metrics-monitoring">
+            <div class="container">
+                <h2>Success Metrics & Monitoring</h2>
+                <div class="metrics-grid">
+                    <div class="metric-category">
+                        <h3>Performance Metrics</h3>
+                        <div class="metric-items">
+                            <div class="metric-item">
+                                <div class="metric-label">First Contentful Paint</div>
+                                <div class="metric-value">&lt; 1.5s</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Time to Interactive</div>
+                                <div class="metric-value">&lt; 3s</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">API Response Time</div>
+                                <div class="metric-value">&lt; 100ms</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-category">
+                        <h3>Reliability Metrics</h3>
+                        <div class="metric-items">
+                            <div class="metric-item">
+                                <div class="metric-label">Uptime SLA</div>
+                                <div class="metric-value">99.99%</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Error Rate</div>
+                                <div class="metric-value">&lt; 0.1%</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">MTTR</div>
+                                <div class="metric-value">&lt; 5min</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-category">
+                        <h3>Business Metrics</h3>
+                        <div class="metric-items">
+                            <div class="metric-item">
+                                <div class="metric-label">Feature Deployment Frequency</div>
+                                <div class="metric-value">Daily</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Lead Time to Production</div>
+                                <div class="metric-value">&lt; 2 days</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Development Velocity</div>
+                                <div class="metric-value">+50%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="navigation-cta">
+            <div class="container">
+                <h2>Explore the Architecture</h2>
+                <p>Dive deep into each component of our scalable banking UI architecture</p>
+                <div class="nav-cards">
+                    <a href="pages/micro-frontends.html" class="nav-card">
+                        <div class="nav-card-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <h3>Micro Frontend Strategy</h3>
+                        <p>Module federation, communication patterns, and domain boundaries</p>
+                    </a>
+                    
+                    <a href="pages/aws-architecture.html" class="nav-card">
+                        <div class="nav-card-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <h3>AWS Infrastructure</h3>
+                        <p>Complete cloud architecture with detailed service diagrams</p>
+                    </a>
+                    
+                    <a href="pages/performance.html" class="nav-card">
+                        <div class="nav-card-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h3>Performance & Scale</h3>
+                        <p>Caching strategies, optimization techniques, and scaling patterns</p>
+                    </a>
+                    
+                    <a href="pages/resilience.html" class="nav-card">
+                        <div class="nav-card-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Resilience & Security</h3>
+                        <p>Fault tolerance, security measures, and compliance framework</p>
+                    </a>
+                    
+                    <a href="pages/ai-integration.html" class="nav-card">
+                        <div class="nav-card-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI Integration</h3>
+                        <p>Machine learning optimization and intelligent automation</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Architecture Focus</h4>
+                    <p>Enterprise-grade scalable UI architecture designed for global banking with 2x year-over-year growth capacity.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Key Technologies</h4>
+                    <div class="tech-list">
+                        <span>AWS Cloud</span>
+                        <span>Micro Frontends</span>
+                        <span>React 18</span>
+                        <span>TypeScript</span>
+                        <span>Module Federation</span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Performance Targets</h4>
+                    <div class="target-list">
+                        <span>99.99% Uptime</span>
+                        <span>&lt;100ms Response</span>
+                        <span>Global Scale</span>
+                        <span>Zero Downtime</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Technical Architecture Presentation - Expert Engineer Program</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
