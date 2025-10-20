@@ -127,8 +127,8 @@
               │
               ▼
     ┌──────────────────────┐     ┌─────────────────────────┐
-    │  User Interaction    │◄────┤  Real-time Updates      │
-    │  & Navigation        │     │  WebSocket/SSE          │
+    │  User Interaction    │◄────┤  State Updates          │
+    │  & Navigation        │     │  Event Bus              │
     └──────────────────────┘     └─────────────────────────┘</code></pre>
                             </div>
                             
@@ -372,15 +372,15 @@ class MFERegistryService {
                                 </div>
                                 
                                 <div class="discovery-method">
-                                    <h4>📡 3. Real-time Updates via WebSocket</h4>
+                                    <h4>📡 3. Real-time Updates via Event Bus</h4>
                                     <div class="method-details">
-                                        <p>Shell app maintains a WebSocket connection to receive instant notifications about MFE changes, updates, and new deployments.</p>
+                                        <p>Shell app maintains connections to receive instant notifications about MFE changes, updates, and new deployments through the event bus system.</p>
                                         
-                                        <div class="websocket-example">
+                                        <div class="eventbus-example">
                                             <h5>Real-time MFE Updates</h5>
-                                            <pre><code class="language-typescript">// Shell App WebSocket Handler
+                                            <pre><code class="language-typescript">// Shell App Event Bus Handler
 class MFEUpdateService {
-  private ws: WebSocket;
+  private eventBus: EventBus;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   
@@ -389,20 +389,19 @@ class MFEUpdateService {
   }
   
   private connect(): void {
-    this.ws = new WebSocket('wss://api.bank.com/mfe-updates');
+    this.eventBus = new EventBus('banking-mfe-updates');
     
-    this.ws.onmessage = (event) => {
-      const update = JSON.parse(event.data);
+    this.eventBus.subscribe('mfe-update', (update) => {
       this.handleMFEUpdate(update);
-    };
+    });
     
-    this.ws.onclose = () => {
+    this.eventBus.onDisconnect(() => {
       this.handleReconnect();
-    };
+    });
     
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+    this.eventBus.onError((error) => {
+      console.error('Event Bus error:', error);
+    });
   }
   
   private async handleMFEUpdate(update: MFEUpdateEvent): Promise<void> {
@@ -863,7 +862,7 @@ flowchart TD
     Y --> Z[Initialize Event Bus]
     Z --> AA[Mount MFE in DOM]
     AA --> BB[Subscribe to State Updates]
-    BB --> CC[Setup WebSocket Connection]
+    BB --> CC[Setup Event Bus Connection]
     CC --> DD[MFE Ready for Interaction]
     
     DD --> EE[User Navigation Event]
@@ -886,7 +885,7 @@ flowchart TD
     NN --> QQ
     
     %% Real-time Updates
-    CC --> RR[WebSocket Message Received]
+    CC --> RR[Event Bus Message Received]
     RR --> SS[Parse Banking Event]
     SS --> TT{Account Balance Update?}
     TT -->|Yes| UU[Update Account MFE State]
@@ -1324,8 +1323,8 @@ graph TD
     K --> N
     L --> N
     
-    %% WebSocket Integration
-    O[WebSocket Server Message] --> P[Parse Banking Event]
+    %% Event Bus Integration
+    O[Banking Event Published] --> P[Parse Banking Event]
     P --> Q{Event Type}
     Q -->|BALANCE_UPDATE| R[Update Account Store]
     Q -->|TRANSACTION_ALERT| S[Show Notification]
@@ -1376,12 +1375,12 @@ interface BankingStateManager {
 class BankingStateManager implements BankingStateManager {
   private eventBus: EventBus;
   private store: EnhancedStore;
-  private websocket: WebSocketManager;
+  private eventHandlers: EventHandlerManager;
   private conflictResolver: ConflictResolver;
   
   constructor() {
     this.setupEventBus();
-    this.initializeWebSocketHandlers();
+    this.initializeEventHandlers();
     this.configureConflictResolution();
   }
   
@@ -1461,7 +1460,7 @@ class BankingStateManager implements BankingStateManager {
     }
   }
   
-  // Real-time WebSocket Event Processing
+  // Real-time Event Processing
   async processRealtimeEvent(
     event: BankingEvent,
     affectedMFEs?: string[]
