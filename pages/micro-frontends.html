@@ -69,34 +69,106 @@
                 </aside>
 
                 <article class="main-content">
-                    <section id="overview" class="content-section">
-                        <h2>Micro Frontend Architecture Overview</h2>
-                        <p>Our banking platform uses a dynamic micro frontend architecture that eliminates the need to constantly rebuild the shell application when new MFEs are added or updated.</p>
-
-                        <div class="architecture-benefits">
-                            <h3>Key Benefits</h3>
-                            <div class="benefits-grid">
-                                <div class="benefit-card">
-                                    <h4>🚀 Independent Deployments</h4>
-                                    <p>Each MFE can be deployed independently without affecting the shell or other MFEs</p>
-                                </div>
-                                <div class="benefit-card">
-                                    <h4>🔄 Runtime Discovery</h4>
-                                    <p>Shell app discovers new MFEs at runtime through dynamic configuration</p>
-                                </div>
-                                <div class="benefit-card">
-                                    <h4>📦 Technology Agnostic</h4>
-                                    <p>Different teams can use React, Vue, Angular, or vanilla JS for their MFEs</p>
-                                </div>
-                                <div class="benefit-card">
-                                    <h4>🛡️ Fault Isolation</h4>
-                                    <p>If one MFE fails, others continue to function normally</p>
-                                </div>
+                    <section id="mfe-overview" class="content-section">
+                        <h2>🧩 Dynamic Micro Frontend Architecture</h2>
+                        
+                        <div class="mfe-intro">
+                            <p>The banking platform implements a sophisticated micro frontend architecture that eliminates the need to rebuild the shell application when individual MFEs are updated. This approach enables true team autonomy while maintaining system coherence.</p>
+                            
+                            <div class="architecture-benefits">
+                                <h3>Key Benefits</h3>
+                                <ul>
+                                    <li><strong>Independent Deployments:</strong> Teams can deploy MFEs without coordinating with other teams</li>
+                                    <li><strong>Technology Diversity:</strong> Different MFEs can use different frameworks (React, Vue, Angular)</li>
+                                    <li><strong>Failure Isolation:</strong> One MFE failure doesn't bring down the entire application</li>
+                                    <li><strong>Team Autonomy:</strong> Reduced dependencies and faster development cycles</li>
+                                    <li><strong>A/B Testing:</strong> Deploy different versions to different user segments</li>
+                                </ul>
                             </div>
                         </div>
-                    </section>
-
-                    <section id="dynamic-discovery" class="content-section">
+                        
+                        <div class="mfe-flow-diagram">
+                            <h3>🔄 Dynamic Discovery Flow</h3>
+                            <p>The complete flow of how MFEs are dynamically discovered, loaded, and integrated at runtime:</p>
+                            
+                            <div class="flow-diagram">
+                                <pre><code class="language-text">     [User Opens Banking App]
+                │
+                ▼
+    ┌──────────────────────┐
+    │    Shell App         │◄─── Initial Load & Authentication
+    │    Bootstraps        │
+    └─────────┬────────────┘
+              │
+              ▼
+    ┌──────────────────────┐     ┌─────────────────────────┐
+    │   MFE Registry       │────►│      DynamoDB           │
+    │   Query              │     │  • Available MFEs       │
+    └─────────┬────────────┘     │  • User Permissions     │
+              │                  │  • Health Status        │
+              ▼                  └─────────────────────────┘
+    ┌──────────────────────┐
+    │   Health Checks      │
+    │   (Parallel)         │
+    └─────────┬────────────┘
+              │
+              ▼
+    ┌──────────────────────┐     ┌─────────────────────────┐
+    │   Dynamic Import     │────►│   Module Federation     │
+    │   & Version Check    │     │   Runtime Loading       │
+    └─────────┬────────────┘     └─────────────────────────┘
+              │
+              ▼
+    ┌──────────────────────┐     ┌─────────────────────────┐ 
+    │   MFE Mount &        │◄────┤   Event Bus Setup       │
+    │   Integration        │     │   State Management      │
+    └─────────┬────────────┘     └─────────────────────────┘
+              │
+              ▼
+    ┌──────────────────────┐     ┌─────────────────────────┐
+    │  User Interaction    │◄────┤  Real-time Updates      │
+    │  & Navigation        │     │  WebSocket/SSE          │
+    └──────────────────────┘     └─────────────────────────┘</code></pre>
+                            </div>
+                            
+                            <div class="flow-phases">
+                                <h4>Flow Phases Breakdown</h4>
+                                <div class="phase-grid">
+                                    <div class="phase-card">
+                                        <h5>Phase 1: Authentication</h5>
+                                        <ul>
+                                            <li>Shell app loads and validates JWT token</li>
+                                            <li>ADFS SAML authentication if needed</li>
+                                            <li>Extract user permissions and role</li>
+                                        </ul>
+                                    </div>
+                                    <div class="phase-card">
+                                        <h5>Phase 2: Discovery</h5>
+                                        <ul>
+                                            <li>Query DynamoDB MFE registry</li>
+                                            <li>Filter MFEs by user permissions</li>
+                                            <li>Get MFE URLs and configurations</li>
+                                        </ul>
+                                    </div>
+                                    <div class="phase-card">
+                                        <h5>Phase 3: Health & Load</h5>
+                                        <ul>
+                                            <li>Parallel health checks for all MFEs</li>
+                                            <li>Dynamic import via Module Federation</li>
+                                            <li>Version compatibility validation</li>
+                                        </ul>
+                                    </div>
+                                    <div class="phase-card">
+                                        <h5>Phase 4: Integration</h5>
+                                        <ul>
+                                            <li>Mount MFEs in designated containers</li>
+                                            <li>Setup event bus communication</li>
+                                            <li>Initialize shared state management</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                    <section id="dynamic-discovery" class="content-section">
                         <h2>🔍 Dynamic MFE Discovery System</h2>
                         
                         <div class="discovery-strategy">
@@ -741,6 +813,70 @@ class MFEUpdateService {
     }
   }
 }</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="error-handling-flow">
+                                <h4>🛡️ Error Handling & Fallback Decision Tree</h4>
+                                <p>Comprehensive error handling ensures banking operations continue even when individual MFEs fail:</p>
+                                
+                                <div class="decision-tree">
+                                    <pre><code class="language-text">    [MFE Load Request]
+            │
+            ▼
+    ┌─────────────────┐
+    │  Health Check   │
+    └─────────┬───────┘
+              │
+         ┌────▼────┐
+         │ Healthy? │
+         └────┬────┘
+              │
+        ┌─────▼─────┐─────┐
+        │    Yes    │ No  │
+        └─────┬─────┘     │
+              │           │
+              ▼           ▼
+    ┌─────────────────┐   ┌─────────────────┐
+    │  Load Fresh MFE │   │  Check Cache    │
+    └─────────┬───────┘   └─────────┬───────┘
+              │                     │
+         ┌────▼────┐            ┌────▼────┐
+         │Success? │            │ Cached? │
+         └────┬────┘            └────┬────┘
+              │                      │
+        ┌─────▼─────┐─────┐    ┌─────▼─────┐─────┐
+        │    Yes    │ No  │    │    Yes    │ No  │
+        └─────┬─────┘     │    └─────┬─────┘     │
+              │           │          │           │
+              ▼           ▼          ▼           ▼
+    ┌─────────────────┐   │ ┌─────────────────┐   │
+    │   Mount MFE     │   │ │ Load Cached MFE │   │
+    └─────────────────┘   │ └─────────────────┘   │
+                          │                       │
+                          ▼                       ▼
+                ┌─────────────────┐     ┌─────────────────┐
+                │ Retry Logic     │     │ Fallback UI     │
+                │ (3 attempts)    │     │ (Limited Func)  │
+                └─────────────────┘     └─────────────────┘</code></pre>
+                                </div>
+                                
+                                <div class="fallback-strategies">
+                                    <h5>Fallback Strategies by MFE Type</h5>
+                                    <div class="strategy-grid">
+                                        <div class="strategy-item">
+                                            <strong>Account MFE:</strong> Show cached balance with "Data may be outdated" warning
+                                        </div>
+                                        <div class="strategy-item">
+                                            <strong>Payment MFE:</strong> Queue transactions for later processing, show status
+                                        </div>
+                                        <div class="strategy-item">
+                                            <strong>Investment MFE:</strong> Display static portfolio view, disable trading
+                                        </div>
+                                        <div class="strategy-item">
+                                            <strong>Settings MFE:</strong> Use minimal form with essential fields only
+                                        </div>
                                     </div>
                                 </div>
                             </div>

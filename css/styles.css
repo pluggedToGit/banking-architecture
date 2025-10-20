@@ -2105,3 +2105,120 @@ footer {
   display: block;
   margin-bottom: 0.5rem;
 }
+
+/* Flow Diagrams */
+.mfe-flow-diagram {
+  margin: 2rem 0;
+}
+
+.flow-diagram {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.flow-diagram pre {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-color);
+}
+
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.phase-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.phase-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.phase-card h5 {
+  color: var(--primary-color);
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.phase-card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.phase-card li {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.decision-tree {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.decision-tree pre {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: #2c3e50;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.strategy-item {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.strategy-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.strategy-item strong {
+  color: #856404;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.error-handling-flow {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.fallback-strategies h5 {
+  color: var(--primary-color);
+  margin: 1.5rem 0 1rem 0;
+  font-weight: 600;
+}
